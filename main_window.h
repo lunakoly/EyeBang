@@ -23,9 +23,15 @@ class MainWindow : public QMainWindow
 		QMediaPlayer mediaPlayer;
 
 		QShortcut *togglePlaybackShortcut;
+		QShortcut *stepToLefterFrameShortcut;
+		QShortcut *stepToRighterFrameShortcut;
+		QShortcut *jumpToLefterFrameShortcut;
+		QShortcut *jumpToRighterFrameShortcut;
 
 		bool wasPlayingBeforeSLiderPress = false;
 		bool isSliderPressed = false;
+
+		qint64 frameJumpSize = 200;
 
 	private slots:
 		void open();
@@ -49,5 +55,13 @@ class MainWindow : public QMainWindow
 		void playbackSliderPress();
 
 		void playbackSliderRelease();
+
+		void stepToLefterFrame();
+
+		void stepToRighterFrame();
+
+		void jumpToLefterFrame();
+
+		void jumpToRighterFrame();
 };
 #endif // MAINWINDOW_H

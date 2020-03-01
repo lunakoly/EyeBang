@@ -34,6 +34,18 @@ MainWindow::MainWindow(QWidget *parent)
 
 	togglePlaybackShortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
 	connect(togglePlaybackShortcut, &QShortcut::activated, this, &MainWindow::togglePlayback);
+
+	stepToLefterFrameShortcut = new QShortcut(QKeySequence(Qt::Key_A), this);
+	connect(stepToLefterFrameShortcut, &QShortcut::activated, this, &MainWindow::stepToLefterFrame);
+
+	stepToRighterFrameShortcut = new QShortcut(QKeySequence(Qt::Key_D), this);
+	connect(stepToRighterFrameShortcut, &QShortcut::activated, this, &MainWindow::stepToRighterFrame);
+
+	jumpToLefterFrameShortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_A), this);
+	connect(jumpToLefterFrameShortcut, &QShortcut::activated, this, &MainWindow::jumpToLefterFrame);
+
+	jumpToRighterFrameShortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_D), this);
+	connect(jumpToRighterFrameShortcut, &QShortcut::activated, this, &MainWindow::jumpToRighterFrame);
 }
 
 MainWindow::~MainWindow()
@@ -127,7 +139,8 @@ void MainWindow::updatePlaybackPosition(qint64 position)
 		qint64 desiredPosition = (qint64) (state * length);
 		ui->playbackSlider->setValue(desiredPosition);
 
-		ui->timeLabel->setText("State: " + QString::number(state));
+//		ui->timeLabel->setText("State: " + QString::number(state));
+		ui->timeLabel->setText("State: " + QString::number(mediaPlayer.position()));
 	}
 }
 
@@ -139,8 +152,6 @@ void MainWindow::setPlaybackPosition(qint64 position)
 		double state = ((double) position) / length;
 		qint64 desiredPosition = (qint64) (state * mediaPlayer.duration());
 		mediaPlayer.setPosition(desiredPosition);
-
-		ui->timeLabel->setText("Phase: " + QString::number(state));
 	}
 }
 
@@ -167,8 +178,65 @@ void MainWindow::playbackSliderRelease()
 	}
 
 	isSliderPressed = false;
+}
 
-	// because changed is not really accurate
-//	setPlaybackPosition(ui->playbackSlider->value());
+void MainWindow::stepToLefterFrame()
+{
+	if (!isSliderPressed)
+	{
+		qint64 position = mediaPlayer.position() - 1;
+
+		if (position < 0)
+		{
+			position = 0;
+		}
+
+		mediaPlayer.setPosition(position);
+	}
+}
+
+void MainWindow::stepToRighterFrame()
+{
+	if (!isSliderPressed)
+	{
+		qint64 position = mediaPlayer.position() + 1;
+
+		if (position > mediaPlayer.duration() - 1)
+		{
+			position = mediaPlayer.duration() - 1;
+		}
+
+		mediaPlayer.setPosition(position);
+	}
+}
+
+void MainWindow::jumpToLefterFrame()
+{
+	if (!isSliderPressed)
+	{
+		qint64 position = mediaPlayer.position() - frameJumpSize;
+
+		if (position < 0)
+		{
+			position = 0;
+		}
+
+		mediaPlayer.setPosition(position);
+	}
+}
+
+void MainWindow::jumpToRighterFrame()
+{
+	if (!isSliderPressed)
+	{
+		qint64 position = mediaPlayer.position() + frameJumpSize;
+
+		if (position > mediaPlayer.duration() - 1)
+		{
+			position = mediaPlayer.duration() - 1;
+		}
+
+		mediaPlayer.setPosition(position);
+	}
 }
 
