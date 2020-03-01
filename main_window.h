@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include <QMediaPlayer>
+#include <QShortcut>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,6 +22,8 @@ class MainWindow : public QMainWindow
 		Ui::MainWindow *ui;
 		QMediaPlayer mediaPlayer;
 
+		QShortcut *togglePlaybackShortcut;
+
 	private slots:
 		void open();
 
@@ -32,6 +35,8 @@ class MainWindow : public QMainWindow
 
 		void play();
 
-		void stop();
+		void pause();
+
+		void togglePlayback();
 };
 #endif // MAINWINDOW_H
