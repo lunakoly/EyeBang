@@ -24,6 +24,9 @@ class MainWindow : public QMainWindow
 
 		QShortcut *togglePlaybackShortcut;
 
+		bool wasPlayingBeforeSLiderPress = false;
+		bool isSliderPressed = false;
+
 	private slots:
 		void open();
 
@@ -38,5 +41,13 @@ class MainWindow : public QMainWindow
 		void pause();
 
 		void togglePlayback();
+
+		void updatePlaybackPosition(qint64);
+
+		void setPlaybackPosition(qint64);
+
+		void playbackSliderPress();
+
+		void playbackSliderRelease();
 };
 #endif // MAINWINDOW_H
