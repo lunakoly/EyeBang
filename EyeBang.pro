@@ -16,14 +16,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    components/custom_window.cpp \
+    components/super_video_widget.cpp \
     main.cpp \
-    main_window.cpp
+    windows/editor_window.cpp
 
 HEADERS += \
-    main_window.h
+    components/custom_window.h \
+    components/super_video_widget.h \
+    help.h \
+    windows/editor_window.h
 
-FORMS += \
-    main_window.ui
+FORMS +=
 
 TRANSLATIONS += \
     EyeBang_ru_RU.ts
