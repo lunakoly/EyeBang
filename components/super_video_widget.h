@@ -7,6 +7,8 @@
 #include <QLabel>
 #include <QMediaPlayer>
 
+#include "timeline_widget.h"
+
 
 class SuperVideoWidget : public QWidget
 {
@@ -29,7 +31,8 @@ class SuperVideoWidget : public QWidget
 	protected:
 		QMediaPlayer *mediaPlayer;
 		QVideoWidget *videoWidget;
-		QSlider *videoSlider;
+//		QSlider *videoSlider;
+		TimelineWidget *timeline;
 
 	private:
 		QLabel *cursorTimeLabel;

@@ -18,12 +18,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     components/custom_window.cpp \
     components/super_video_widget.cpp \
+    components/timeline_widget.cpp \
     main.cpp \
     windows/editor_window.cpp
 
 HEADERS += \
     components/custom_window.h \
     components/super_video_widget.h \
+    components/timeline_widget.h \
     help.h \
     windows/editor_window.h
 
