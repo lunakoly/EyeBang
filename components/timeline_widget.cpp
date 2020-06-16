@@ -72,6 +72,151 @@ void TimelineWidget::setValue(int value)
 	}
 }
 
+Layer *TimelineWidget::addLayer(const QString &name)
+{	
+	if (!layers.contains(name))
+	{
+		layers[name] = new Layer(name, this);
+	}
+
+	auto it = layers[name];
+	emit layerAdded(it);
+
+	if (currentLayer == nullptr)
+	{
+		currentLayer = it;
+		emit currentLayerChanged(it);
+		repaint();
+	}
+
+	return it;
+}
+
+Layer *TimelineWidget::removeLayer(const QString &name)
+{
+	if (layers.contains(name))
+	{
+		auto it = layers[name];
+		layers.remove(name);
+		emit layerRemoved(it);
+
+		if (currentLayer == it)
+		{
+			currentLayer = nullptr;
+
+			if (!layers.isEmpty())
+			{
+				currentLayer = layers.values().first();
+			}
+
+			emit currentLayerChanged(currentLayer);
+			repaint();
+		}
+
+		return it;
+	}
+
+	return nullptr;
+}
+
+Layer *TimelineWidget::getLayer(const QString &name)
+{
+	if (layers.contains(name))
+	{
+		return layers[name];
+	}
+
+	return nullptr;
+}
+
+QList<Layer *> TimelineWidget::getLayers()
+{
+	return layers.values();
+}
+
+Layer *TimelineWidget::getCurrentLayer()
+{
+	return currentLayer;
+}
+
+Layer *TimelineWidget::setCurrentLayer(const QString &name)
+{
+	if (layers.contains(name))
+	{
+		currentLayer = layers[name];
+		emit currentLayerChanged(currentLayer);
+		repaint();
+		return currentLayer;
+	}
+
+	return nullptr;
+}
+
+Layer *TimelineWidget::removeCurrentLayer()
+{
+	if (currentLayer != nullptr)
+	{
+		auto result = removeLayer(currentLayer->name);
+		emit currentLayerChanged(nullptr);
+		repaint();
+		return result;
+	}
+
+	return nullptr;
+}
+
+void TimelineWidget::toggleRecord()
+{
+	if (overlay != nullptr && !overlay->isHidden())
+	{
+		return;
+	}
+
+	if (currentLayer != nullptr && !currentLayer->canStart(currentValue))
+	{
+		return;
+	}
+
+	if (isRecording)
+	{
+		if (currentValue >= recordingStart)
+		{
+			recordedSegment = {recordingStart, currentValue};
+		}
+		else
+		{
+			recordedSegment = {currentValue, recordingStart};
+		}
+
+		if (currentLayer != nullptr)
+		{
+			currentLayer->addSegment(recordedSegment);
+		}
+		else
+		{
+			if (overlay != nullptr)
+			{
+				overlay->askForText("New Layer Name", this, (OverlayWidget::AnswerReceiver) &TimelineWidget::finishNewLayer);
+			}
+		}
+	}
+	else
+	{
+		recordingStart = currentValue;
+	}
+
+	isRecording = !isRecording;
+	repaint();
+}
+
+void TimelineWidget::finishNewLayer(const QString &text)
+{
+	auto layer = addLayer(text);
+	layer->addSegment(recordedSegment);
+	qDebug() << "End" << recordedSegment.end;
+	repaint();
+}
+
 void TimelineWidget::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
@@ -115,6 +260,51 @@ void TimelineWidget::paintEvent(QPaintEvent *event)
 		current += step;
 	}
 
+	// layers
+	if (currentLayer != nullptr)
+	{
+		painter.setPen(QPen(QColor(255, 253, 135), 2));
+		painter.setBrush(QColor(255, 253, 135, 200));
+
+		for (auto &it : currentLayer->getSegments())
+		{
+			qreal beginState = (double) (it.begin - minimumValue) / (maximumValue - minimumValue);
+			qreal   endState = (double) (it.end   - minimumValue) / (maximumValue - minimumValue);
+
+			int beginPosition = qRound(beginState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
+			int   endPosition = qRound(  endState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
+
+			painter.drawRect(beginPosition, paddingTop + 10, endPosition - beginPosition, rect().height() - paddingTop - 20);
+		}
+	}
+
+	// recording segment
+	if (isRecording)
+	{
+		qreal        currentState = (double) (currentValue   - minimumValue) / (maximumValue - minimumValue);
+		qreal recordingStartState = (double) (recordingStart - minimumValue) / (maximumValue - minimumValue);
+
+		int        currentPosition = qRound(       currentState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
+		int recordingStartPosition = qRound(recordingStartState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
+
+		painter.setPen(QPen(QColor(255, 253, 255), 2));
+		painter.setBrush(QColor(255, 255, 255, 200));
+
+		if (currentPosition < recordingStartPosition)
+		{
+			painter.drawRect(currentPosition, paddingTop + 5, recordingStartPosition - currentPosition, rect().height() - paddingTop - 10);
+		}
+		else
+		{
+			painter.drawRect(recordingStartPosition, paddingTop + 5, currentPosition - recordingStartPosition, rect().height() - paddingTop - 10);
+		}
+
+		painter.setPen(QPen(QColor("#aaaaaa"), 1));
+		painter.drawLine(recordingStartPosition, paddingTop, recordingStartPosition, rect().height());
+
+	}
+
+	// red cursor
 	if (isEnabled())
 	{
 		// cursor vertical line
@@ -137,35 +327,6 @@ void TimelineWidget::paintEvent(QPaintEvent *event)
 	}
 
 	painter.restore();
-
-//	if (rect().width() != 0 && rect().height() != 0)
-//	{
-//		QSize videoSize = frameProber.videoSize();
-
-//		qDebug() << "Video Size =" << videoSize;
-
-//		qreal rescale = (double) videoSize.height() / rect().height();
-
-//		qDebug() << "Rescale =" << rescale;
-
-//		int previewWidth = qRound(videoSize.width() * rescale);
-//		qint64 interval = qRound64((double) previewWidth / rect().width() * frameProber.duration());
-
-//		qDebug() << "Frame width =" << previewWidth;
-//		qDebug() << "Interval =" << interval;
-
-//		frameProber.captureFrames(interval);
-
-//		qDebug() << "Size =" << frameProber.capturedFrames.size();
-
-//		for (int it = 0; it < frameProber.capturedFrames.size(); it++)
-//		{
-//			QRect place = rect();
-//			place.setX(it * previewWidth);
-//			place.setWidth(previewWidth);
-//			painter.drawPixmap(place, frameProber.capturedFrames[it]);
-//		}
-//	}
 }
 
 void TimelineWidget::mousePressEvent(QMouseEvent *event)
@@ -204,60 +365,3 @@ void TimelineWidget::recalculateCurrent(qreal position)
 	int value = qRound((double) position / width() * (maximumValue - minimumValue)) + minimumValue;
 	setValue(value);
 }
-
-//TimelineWidget::VideoFrameProber::VideoFrameProber() : QAbstractVideoSurface()
-//{
-//	mediaPlayer = new QMediaPlayer(this);
-//	mediaPlayer->setVideoOutput(this);
-//}
-
-//QSize TimelineWidget::VideoFrameProber::videoSize()
-//{
-//	return mediaPlayer->metaData("Resolution").toSize();
-//}
-
-//qint64 TimelineWidget::VideoFrameProber::duration()
-//{
-//	return mediaPlayer->duration();
-//}
-
-//void TimelineWidget::VideoFrameProber::captureFrames(qint64 interval)
-//{
-//	capturedFrames.clear();
-//	mediaPlayer->setPosition(0);
-//	mediaPlayer->play();
-
-//	qint64 current = 0;
-
-//	while (current < mediaPlayer->duration())
-//	{
-//		mediaPlayer->setPosition(current);
-//		current += interval;
-//	}
-//}
-
-//QList<QVideoFrame::PixelFormat> TimelineWidget::VideoFrameProber::supportedPixelFormats(
-//	QAbstractVideoBuffer::HandleType type = QAbstractVideoBuffer::HandleType::NoHandle
-//) const
-//{
-//	Q_UNUSED(type);
-//	return QList<QVideoFrame::PixelFormat>() << QVideoFrame::Format_RGB565;
-//}
-
-//bool TimelineWidget::VideoFrameProber::present(const QVideoFrame &frame)
-//{
-//	QImage::Format format = QVideoFrame::imageFormatFromPixelFormat(frame.pixelFormat());
-
-//	QImage image(
-//		frame.bits(),
-//		frame.width(),
-//		frame.height(),
-//		frame.bytesPerLine(),
-//		format
-//	);
-
-//	QPixmap pixmap = QPixmap::fromImage(image);
-//	capturedFrames.append(pixmap);
-
-//	return true;
-//}

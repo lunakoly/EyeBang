@@ -6,8 +6,11 @@
 #include <QSlider>
 #include <QLabel>
 #include <QMediaPlayer>
+#include <QVBoxLayout>
+#include <QScrollArea>
 
 #include "timeline_widget.h"
+#include "layer_select_button.h"
 
 
 class SuperVideoWidget : public QWidget
@@ -19,6 +22,8 @@ class SuperVideoWidget : public QWidget
 
 		void loadFromVideoFile(const QString &filename);
 
+		TimelineWidget *getTimeline();
+
 		void play();
 		void pause();
 		void togglePlayback();
@@ -28,11 +33,21 @@ class SuperVideoWidget : public QWidget
 		void jumpLeft();
 		void jumpRight();
 
+		// from editor_window shortcuts
+		void doSelectUpperLayer();
+		void doSelectLowerLayer();
+
 	protected:
 		QMediaPlayer *mediaPlayer;
 		QVideoWidget *videoWidget;
-//		QSlider *videoSlider;
 		TimelineWidget *timeline;
+
+		// for some reason I couldn't get
+		// children of layersList so I started
+		// parenting buttons to heightProvider
+		// and using findChildren<>() over it
+		QWidget *heightProvider;
+		QVBoxLayout *layersList;
 
 	private:
 		QLabel *cursorTimeLabel;
@@ -42,6 +57,7 @@ class SuperVideoWidget : public QWidget
 		bool isSliderPressed = false;
 
 		QLayout *createDetails();
+		QScrollArea *createLayersArea();
 
 		QString timeToString(qint64 time);
 
@@ -52,6 +68,12 @@ class SuperVideoWidget : public QWidget
 
 		void mediaPlayerPositionChanged(qint64 position);
 		void videoSliderValueChanged(qint64 position);
+
+		void updateLayerAdded(Layer *layer);
+		void selectLayerByButton(Layer *layer);
+		void updateLayerRemoved(Layer *layer);
+		void updateCurrentLayerChanged(Layer *newLayer);
 };
+
 
 #endif // SUPERVIDEOWIDGET_H

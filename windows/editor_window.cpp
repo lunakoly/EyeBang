@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <QVideoWidget>
 #include <QTabWidget>
+#include <QStackedLayout>
+#include <QGraphicsAnchorLayout>
 
 #include <QStyleFactory>
 #include <QApplication>
@@ -14,6 +16,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QGraphicsOpacityEffect>
 
 
 void EditorWindow::setupAction()
@@ -71,12 +74,34 @@ void EditorWindow::setupShortcuts()
 	shortcutJumpLeft  = new QShortcut(QKeySequence(Qt::Key_A),             this);
 	shortcutJumpRight = new QShortcut(QKeySequence(Qt::Key_D),             this);
 
+	shortcutAddLayer    = new QShortcut(QKeySequence(Qt::Key_L), this);
+	shortcutRemoveLayer = new QShortcut(QKeySequence(Qt::Key_R), this);
+
+	shortcutSelectUpperLayer = new QShortcut(QKeySequence(Qt::Key_Up), this);
+	shortcutSelectLowerLayer = new QShortcut(QKeySequence(Qt::Key_Down), this);
+
+	shortcutRecordSegment = new QShortcut(QKeySequence(Qt::Key_G), this);
+
+	shortcutNewLeftBound  = new QShortcut(QKeySequence(Qt::Key_BracketLeft),  this);
+	shortcutNewRightBound = new QShortcut(QKeySequence(Qt::Key_BracketRight), this);
+
 	connect(shortcutTogglePlayback, &QShortcut::activated, this, &EditorWindow::doTogglePlayback);
 
 	connect(shortcutStepLeft,  &QShortcut::activated, videoTab, &SuperVideoWidget::stepLeft);
 	connect(shortcutStepRight, &QShortcut::activated, videoTab, &SuperVideoWidget::stepRight);
 	connect(shortcutJumpLeft,  &QShortcut::activated, videoTab, &SuperVideoWidget::jumpLeft);
 	connect(shortcutJumpRight, &QShortcut::activated, videoTab, &SuperVideoWidget::jumpRight);
+
+	connect(shortcutAddLayer,    &QShortcut::activated, this, &EditorWindow::doAddLayer);
+	connect(shortcutRemoveLayer, &QShortcut::activated, this, &EditorWindow::doRemoveLayer);
+
+	connect(shortcutSelectUpperLayer, &QShortcut::activated, videoTab, &SuperVideoWidget::doSelectUpperLayer);
+	connect(shortcutSelectLowerLayer, &QShortcut::activated, videoTab, &SuperVideoWidget::doSelectLowerLayer);
+
+	connect(shortcutRecordSegment, &QShortcut::activated, videoTab->getTimeline(), &TimelineWidget::toggleRecord);
+
+	connect(shortcutNewLeftBound,  &QShortcut::activated, this, &EditorWindow::doNewLeftBound);
+	connect(shortcutNewRightBound, &QShortcut::activated, this, &EditorWindow::doNewRightBound);
 }
 
 EditorWindow::EditorWindow(QWidget *parent) : CustomWindow(tr("EyeBang"), parent)
@@ -90,9 +115,21 @@ EditorWindow::EditorWindow(QWidget *parent) : CustomWindow(tr("EyeBang"), parent
 	tabs->setTabPosition(QTabWidget::West);
 	tabs->addTab(videoTab, tr("Video Tab"));
 
-	QVBoxLayout *layout = new QVBoxLayout(this);
+	overlay = new OverlayWidget(this);
+	// TODO: make proper access
+	videoTab->getTimeline()->overlay = overlay;
+
+	// we could've used absolute positioning
+	// instead but int that case we'd need
+	// to manually update overlay size
+	layout = new QStackedLayout(this);
+	layout->setStackingMode(QStackedLayout::StackAll);
 	layout->setMenuBar(menuBar);
+	layout->addWidget(overlay);
 	layout->addWidget(tabs);
+
+	layout->setCurrentWidget(overlay);
+	overlay->setHidden(true);
 
 	setupShortcuts();
 }
@@ -151,5 +188,45 @@ void EditorWindow::runAbout()
 void EditorWindow::doTogglePlayback()
 {
 	videoTab->togglePlayback();
+}
+
+void EditorWindow::doAddLayer()
+{
+	overlay->askForText("Layer Name", this, (OverlayWidget::AnswerReceiver) &EditorWindow::doAddLayerOverlayCallback);
+}
+
+void EditorWindow::doAddLayerOverlayCallback(const QString &answer)
+{
+	if (!answer.isEmpty())
+	{
+		videoTab->getTimeline()->addLayer(answer);
+	}
+}
+
+void EditorWindow::doRemoveLayer()
+{
+	videoTab->getTimeline()->removeCurrentLayer();
+}
+
+void EditorWindow::doNewLeftBound()
+{
+	auto timeline = videoTab->getTimeline();
+
+	if (timeline->getCurrentLayer() != nullptr)
+	{
+		timeline->getCurrentLayer()->setNewLeftBound(timeline->value());
+		timeline->repaint();
+	}
+}
+
+void EditorWindow::doNewRightBound()
+{
+	auto timeline = videoTab->getTimeline();
+
+	if (timeline->getCurrentLayer() != nullptr)
+	{
+		timeline->getCurrentLayer()->setNewRightBound(timeline->value());
+		timeline->repaint();
+	}
 }
 

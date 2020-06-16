@@ -5,6 +5,10 @@
 
 #include <QMediaPlayer>
 #include <QAbstractVideoSurface>
+#include <QHash>
+
+#include "layer.h"
+#include "overlay_widget.h"
 
 
 class TimelineWidget : public QWidget
@@ -12,6 +16,9 @@ class TimelineWidget : public QWidget
 		Q_OBJECT
 
 	public:
+		// TODO: make proper access
+		OverlayWidget *overlay = nullptr;
+
 		explicit TimelineWidget(QWidget *parent = nullptr);
 
 		QSize sizeHint() const override;
@@ -28,41 +35,52 @@ class TimelineWidget : public QWidget
 		int value();
 		void setValue(int value);
 
+		Layer *addLayer(const QString &name);
+		Layer *removeLayer(const QString &name);
+
+		Layer *getLayer(const QString &name);
+		QList<Layer *> getLayers();
+
+		Layer *getCurrentLayer();
+		Layer *setCurrentLayer(const QString &name);
+		Layer *removeCurrentLayer();
+
+		void toggleRecord();
+
+		void finishNewLayer(const QString &text);
+
 	signals:
 		void sliderPressed();
 		void sliderReleased();
 		void valueChanged(qint64 position);
 
+		void layerAdded(Layer *layer);
+		void layerRemoved(Layer *layer);
+		void currentLayerChanged(Layer *newLayer);
+
 	protected:
-//		struct VideoFrameProber : public QAbstractVideoSurface
-//		{
-//			QMediaPlayer *mediaPlayer;
-//			QVector<QPixmap> capturedFrames;
-
-//			VideoFrameProber();
-
-//			QSize videoSize();
-//			qint64 duration();
-//			void captureFrames(qint64 interval);
-
-//			QList<QVideoFrame::PixelFormat> supportedPixelFormats(QAbstractVideoBuffer::HandleType type) const override;
-//			bool present(const QVideoFrame &frame) override;
-//		};
-
-//		VideoFrameProber frameProber;
-
 		int minimumValue = 0;
 		int maximumValue = 100;
 
 		int currentValue = 0;
+
+		Layer *currentLayer = nullptr;
+
+		int recordingStart = 0;
+		int isRecording = false;
 
 		void paintEvent(QPaintEvent *event) override;
 		void mousePressEvent(QMouseEvent *event) override;
 		void mouseReleaseEvent(QMouseEvent *event) override;
 		void mouseMoveEvent(QMouseEvent *event) override;
 
+		QHash<QString, Layer*> layers;
+
 	private:
+		Segment recordedSegment{0,0};
+
 		void recalculateCurrent(qreal position);
 };
+
 
 #endif // TIMELINEWIDGET_H

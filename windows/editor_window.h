@@ -7,6 +7,9 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QShortcut>
+#include <QStackedLayout>
+
+#include "components/overlay_widget.h"
 
 
 class EditorWindow : public CustomWindow
@@ -15,6 +18,8 @@ class EditorWindow : public CustomWindow
 
 	public:
 		explicit EditorWindow(QWidget *parent = nullptr);
+
+		void doAddLayerOverlayCallback(const QString &answer);
 
 	private:
 		QAction *actionNewVideoFile;
@@ -39,12 +44,25 @@ class EditorWindow : public CustomWindow
 		QShortcut *shortcutStepRight;
 		QShortcut *shortcutJumpLeft;
 		QShortcut *shortcutJumpRight;
+		QShortcut *shortcutAddLayer;
+		QShortcut *shortcutRemoveLayer;
+		QShortcut *shortcutSelectUpperLayer;
+		QShortcut *shortcutSelectLowerLayer;
+		QShortcut *shortcutRecordSegment;
+		QShortcut *shortcutNewLeftBound;
+		QShortcut *shortcutNewRightBound;
 
 		void setupShortcuts();
 		void doTogglePlayback();
+		void doAddLayer();
+		void doRemoveLayer();
+		void doNewLeftBound();
+		void doNewRightBound();
 
 		QMenuBar *menuBar;
 		SuperVideoWidget *videoTab;
+		OverlayWidget *overlay;
+		QStackedLayout *layout;
 
 		void setupMenu();
 };

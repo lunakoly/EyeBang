@@ -16,17 +16,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    components/better_line_edit.cpp \
     components/custom_window.cpp \
+    components/layer_select_button.cpp \
+    components/overlay_widget.cpp \
+    components/panel.cpp \
     components/super_video_widget.cpp \
     components/timeline_widget.cpp \
+    layer.cpp \
     main.cpp \
     windows/editor_window.cpp
 
 HEADERS += \
+    components/better_line_edit.h \
     components/custom_window.h \
+    components/layer_select_button.h \
+    components/overlay_widget.h \
+    components/panel.h \
     components/super_video_widget.h \
     components/timeline_widget.h \
     help.h \
+    layer.h \
+    segment.h \
     windows/editor_window.h
 
 FORMS +=
