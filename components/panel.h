@@ -4,6 +4,10 @@
 #include <QWidget>
 
 
+/**
+ * Just a widget with dark background
+ * color and rounded corners.
+ */
 class Panel : public QWidget
 {
 		Q_OBJECT

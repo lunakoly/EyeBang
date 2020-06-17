@@ -61,12 +61,6 @@ QScrollArea *SuperVideoWidget::createLayersArea()
 
 	layersList = new QVBoxLayout(heightProvider);
 
-	for (int it = 0; it < 0; it++)
-	{
-		QRadioButton *button = new QRadioButton(tr("Hello!"), this);
-		layersList->addWidget(button);
-	}
-
 	QScrollArea *layersListHolder = new QScrollArea(this);
 	layersListHolder->setFixedWidth(250);
 	layersListHolder->setWidgetResizable(true);
@@ -163,7 +157,8 @@ void SuperVideoWidget::togglePlayback()
 void SuperVideoWidget::stepLeft()
 {
 	// isSeekable here to prevent scrolling before
-	// a video is loaded into the mediaPlayers
+	// a video is loaded into the mediaPlayers.
+	// TODO: add something like	`isVideoAvailable()`.
 	if (!isSliderPressed && mediaPlayer->isSeekable())
 	{
 		qint64 position = mediaPlayer->position() - STEP_SIZE;

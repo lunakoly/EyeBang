@@ -32,6 +32,9 @@ OverlayWidget::OverlayWidget(QWidget *parent) : QWidget(parent)
 
 	setupTextInputPopup();
 
+	// box layout is used here
+	// because it gives us easy
+	// center alignment
 	QVBoxLayout *popups = new QVBoxLayout(this);
 	popups->setAlignment(Qt::AlignCenter);
 	popups->addWidget(textInputPopup);
@@ -68,9 +71,11 @@ void OverlayWidget::askForText(
 	textInputPopupText->setFocus();
 	setHidden(false);
 
+	// esc pressed
+	connect(textInputPopupText, &BetterLineEdit::escape, this, &OverlayWidget::cancel);
+
 	// call user code and hide the overlay
 	connect(textInputPopupText, &BetterLineEdit::submit, this, &OverlayWidget::textInputPopupSubmitted);
-	connect(textInputPopupText, &BetterLineEdit::escape, this, &OverlayWidget::cancel);
 	connect(textInputPopupText, &BetterLineEdit::submit, receiver, callback);
 }
 

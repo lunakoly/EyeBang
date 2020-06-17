@@ -41,8 +41,10 @@ void Layer::addSegment(const Segment &segment)
 		}
 	}
 
-	// detect touching or one-side
+	// detect touching and one-side
 	// overlapping segments
+	// (by invariant we believe that there're
+	// no overlapping segments now).
 	int touchLeft = -1;
 	int touchRight = -1;
 
@@ -83,7 +85,7 @@ void Layer::addSegment(const Segment &segment)
 
 void Layer::removeSegment(int index)
 {
-	auto &it = segments[index];
+	auto it = segments[index];
 	segments.remove(index);
 	emit segmentRemoved(it);
 }
@@ -92,7 +94,7 @@ void Layer::clearSegments()
 {
 	while (!segments.isEmpty())
 	{
-		auto &it = segments[0];
+		auto it = segments[0];
 		segments.removeFirst();
 		emit segmentRemoved(it);
 	}
@@ -174,7 +176,7 @@ bool Layer::canStart(int position)
 {
 	for (auto &it : segments)
 	{
-		if (it.begin < position && position < it.end)
+		if (it.begin <= position && position <= it.end)
 		{
 			return false;
 		}

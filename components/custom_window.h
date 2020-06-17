@@ -4,6 +4,10 @@
 #include <QWidget>
 
 
+/**
+ * All our windows should extend this class
+ * for the ease of further customization.
+ */
 class CustomWindow : public QWidget
 {
 		Q_OBJECT

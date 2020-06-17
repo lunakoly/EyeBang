@@ -19,7 +19,7 @@
 #include <QGraphicsOpacityEffect>
 
 
-void EditorWindow::setupAction()
+void EditorWindow::setupActions()
 {
 	actionAbout = new QAction(tr("About"), this);
 
@@ -48,6 +48,7 @@ void EditorWindow::setupMenu()
 {
 	menuBar = new QMenuBar(this);
 
+	// I found these indents handy
 	QMenu *fileMenu = menuBar->addMenu(tr("File"));
 		QMenu *fileNewMenu = fileMenu->addMenu(tr("New From..."));
 			fileNewMenu->addAction(actionNewVideoFile);
@@ -106,7 +107,7 @@ void EditorWindow::setupShortcuts()
 
 EditorWindow::EditorWindow(QWidget *parent) : CustomWindow(tr("EyeBang"), parent)
 {
-	setupAction();
+	setupActions();
 	setupMenu();
 
 	videoTab = new SuperVideoWidget(this);

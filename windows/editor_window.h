@@ -12,6 +12,9 @@
 #include "components/overlay_widget.h"
 
 
+/**
+ * The main window for the app.
+ */
 class EditorWindow : public CustomWindow
 {
 		Q_OBJECT
@@ -19,6 +22,12 @@ class EditorWindow : public CustomWindow
 	public:
 		explicit EditorWindow(QWidget *parent = nullptr);
 
+		/**
+		 * This is a callback for the overlay
+		 * when prompting for the user text input.
+		 * It's used to get the name for the new layer
+		 * when the user presses the shortcut.
+		 */
 		void doAddLayerOverlayCallback(const QString &answer);
 
 	private:
@@ -30,7 +39,9 @@ class EditorWindow : public CustomWindow
 		QAction *actionExportRangesFile;
 		QAction *actionAbout;
 
-		void setupAction();
+		void setupActions();
+		// `run` - it's a callback
+		// for an action
 		void runNewVideoFile();
 		void runNewYouTube();
 		void runOpen();
@@ -53,6 +64,8 @@ class EditorWindow : public CustomWindow
 		QShortcut *shortcutNewRightBound;
 
 		void setupShortcuts();
+		// `do` - it's a callback
+		// for a shortcut
 		void doTogglePlayback();
 		void doAddLayer();
 		void doRemoveLayer();

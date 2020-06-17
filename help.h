@@ -2,13 +2,13 @@
 #include <QStyleFactory>
 
 
-/*!
-	Some helper things.
-*/
+/**
+ * Some helper things.
+ */
 namespace Help {
-	/*!
-		Shows the available styles for this platform.
-	*/
+	/**
+	 * Shows the available styles for this platform.
+	 */
 	void printAvailableStyles()
 	{
 		qDebug() << "Possible styles are:";

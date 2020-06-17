@@ -4,11 +4,11 @@
 #include <QLineEdit>
 
 
-/*!
-	QLineEdit with additional signal
-	for detecting returnPressed and passing
-	the text as a parameter at once.
-*/
+/**
+ * QLineEdit with additional signal
+ * for detecting returnPressed and passing
+ * the text as a parameter at once.
+ */
 class BetterLineEdit : public QLineEdit
 {
 		Q_OBJECT
@@ -17,14 +17,14 @@ class BetterLineEdit : public QLineEdit
 		BetterLineEdit(QWidget *parent = nullptr);
 
 	signals:
-		/*!
-			Emitted when the return key is pressed
-			and if text is not empty.
-		*/
+		/**
+		 * Emitted when the return key is pressed
+		 * and if text is not empty.
+		 */
 		void submit(const QString &text);
-		/*!
-			Emitted when the escape key is pressed.
-		*/
+		/**
+		 * Emitted when the escape key is pressed.
+		 */
 		void escape();
 
 	protected:

@@ -8,6 +8,7 @@
 
 BetterLineEdit::BetterLineEdit(QWidget *parent) : QLineEdit(parent)
 {
+	// clean dark style
 	setStyleSheet("QLineEdit { background-color: #585858; color: white; border-radius: 5px; font-size: 20px; padding: 0px 5px; } QLineEdit:focus { border: none; }");
 }
 
