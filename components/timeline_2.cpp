@@ -1,4 +1,4 @@
-#include "timeline.h"
+#include "timeline_2.h"
 
 #include <QPainter>
 #include <QtMath>
@@ -6,22 +6,22 @@
 #include <QPainterPath>
 
 
-Timeline::Timeline(QWidget *parent) : QWidget(parent)
+Timeline2::Timeline2(QWidget *parent) : QWidget(parent)
 {
 
 }
 
-QSize Timeline::sizeHint() const
+QSize Timeline2::sizeHint() const
 {
 	return QSize(70, 70);
 }
 
-int Timeline::minimum()
+int Timeline2::minimum()
 {
 	return minimumValue;
 }
 
-void Timeline::setMinimum(int value)
+void Timeline2::setMinimum(int value)
 {
 	minimumValue = value;
 
@@ -31,12 +31,12 @@ void Timeline::setMinimum(int value)
 	}
 }
 
-int Timeline::maximum()
+int Timeline2::maximum()
 {
 	return maximumValue;
 }
 
-void Timeline::setMaximum(int value)
+void Timeline2::setMaximum(int value)
 {
 	maximumValue = value;
 
@@ -46,12 +46,12 @@ void Timeline::setMaximum(int value)
 	}
 }
 
-int Timeline::value()
+int Timeline2::value()
 {
 	return currentValue;
 }
 
-void Timeline::setValue(int value)
+void Timeline2::setValue(int value)
 {
 	int oldValue = currentValue;
 	currentValue = value;
@@ -72,108 +72,31 @@ void Timeline::setValue(int value)
 	}
 }
 
-Layer *Timeline::addLayer(const QString &name)
-{	
-	if (!layers.contains(name))
-	{
-		layers[name] = new Layer(name, this);
-	}
-
-	auto it = layers[name];
-	emit layerAdded(it);
-
-	if (currentLayer == nullptr)
-	{
-		currentLayer = it;
-		emit currentLayerChanged(it);
-		repaint();
-	}
-
-	return it;
-}
-
-Layer *Timeline::removeLayer(const QString &name)
-{
-	if (layers.contains(name))
-	{
-		auto it = layers[name];
-		layers.remove(name);
-		emit layerRemoved(it);
-
-		if (currentLayer == it)
-		{
-			currentLayer = nullptr;
-
-			if (!layers.isEmpty())
-			{
-				currentLayer = layers.values().first();
-			}
-
-			emit currentLayerChanged(currentLayer);
-			repaint();
-		}
-
-		return it;
-	}
-
-	return nullptr;
-}
-
-Layer *Timeline::getLayer(const QString &name)
-{
-	if (layers.contains(name))
-	{
-		return layers[name];
-	}
-
-	return nullptr;
-}
-
-QList<Layer *> Timeline::getLayers()
-{
-	return layers.values();
-}
-
-Layer *Timeline::getCurrentLayer()
+Layer *Timeline2::getCurrentLayer()
 {
 	return currentLayer;
 }
 
-Layer *Timeline::setCurrentLayer(const QString &name)
+Layer *Timeline2::setCurrentLayer(Layer *layer)
 {
-	if (layers.contains(name))
+	auto oldLayer = currentLayer;
+	currentLayer = layer;
+
+	if (oldLayer != layer)
 	{
-		currentLayer = layers[name];
 		emit currentLayerChanged(currentLayer);
 		repaint();
-		return currentLayer;
 	}
 
-	return nullptr;
+	return currentLayer;
 }
 
-Layer *Timeline::removeCurrentLayer()
+void Timeline2::toggleRecord()
 {
-	if (currentLayer != nullptr)
-	{
-		auto result = removeLayer(currentLayer->name);
-		emit currentLayerChanged(nullptr);
-		repaint();
-		return result;
-	}
-
-	return nullptr;
-}
-
-void Timeline::toggleRecord()
-{
-	if (overlay != nullptr && !overlay->isHidden())
-	{
-		return;
-	}
-
 	if (isRecording)
 	{
+		isRecording = false;
+
 		if (currentValue >= recordingStart)
 		{
 			recordedSegment = {recordingStart, currentValue};
@@ -189,30 +112,47 @@ void Timeline::toggleRecord()
 		}
 		else
 		{
-			if (overlay != nullptr)
-			{
-				overlay->askForText("New Layer Name", this, (TextCallback) &Timeline::finishNewLayer);
-			}
+			emit requestAddNewLayer();
+			isReadyToSaveRecording = true;
 		}
 	}
 	else
 	{
 		recordingStart = currentValue;
+		isRecording = true;
 	}
 
-	isRecording = !isRecording;
-	repaint();
+	// we can't write:
+	// isRecording = !isRecording;
+	// here because emit will trigger
+	// the repaint and repaint will both
+	// see the new layer and the selection box.
+	// although, we may say here:
+	// isRecording = !isRecording;
+	// repaint();
 }
 
-void Timeline::finishNewLayer(const QString &text)
+void Timeline2::layerAdded(Layer *layer)
 {
-	auto layer = addLayer(text);
-	layer->addSegment(recordedSegment);
-	qDebug() << "End" << recordedSegment.end;
-	repaint();
+	connect(layer, &Layer::segmentAdded,     this, &Timeline2::updateSegmentAdded);
+	connect(layer, &Layer::segmentRemoved,   this, &Timeline2::updateSegmentRemoved);
+	connect(layer, &Layer::segmentsModified, this, &Timeline2::updateSegmentsModified);
+
+	if (isReadyToSaveRecording)
+	{
+		layer->addSegment(recordedSegment);
+		isReadyToSaveRecording = false;
+	}
 }
 
-void Timeline::paintEvent(QPaintEvent *event)
+void Timeline2::layerRemoved(Layer *layer)
+{
+	disconnect(layer, &Layer::segmentAdded,     this, &Timeline2::updateSegmentAdded);
+	disconnect(layer, &Layer::segmentRemoved,   this, &Timeline2::updateSegmentRemoved);
+	disconnect(layer, &Layer::segmentsModified, this, &Timeline2::updateSegmentsModified);
+}
+
+void Timeline2::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -324,7 +264,7 @@ void Timeline::paintEvent(QPaintEvent *event)
 	painter.restore();
 }
 
-void Timeline::mousePressEvent(QMouseEvent *event)
+void Timeline2::mousePressEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -336,7 +276,7 @@ void Timeline::mousePressEvent(QMouseEvent *event)
 	}
 }
 
-void Timeline::mouseReleaseEvent(QMouseEvent *event)
+void Timeline2::mouseReleaseEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -346,7 +286,7 @@ void Timeline::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
-void Timeline::mouseMoveEvent(QMouseEvent *event)
+void Timeline2::mouseMoveEvent(QMouseEvent *event)
 {
 	if (isEnabled())
 	{
@@ -355,8 +295,23 @@ void Timeline::mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
-void Timeline::recalculateCurrent(qreal position)
+void Timeline2::recalculateCurrent(qreal position)
 {
 	int value = qRound((double) position / width() * (maximumValue - minimumValue)) + minimumValue;
 	setValue(value);
+}
+
+void Timeline2::updateSegmentAdded(const Segment &)
+{
+	repaint();
+}
+
+void Timeline2::updateSegmentRemoved(Segment)
+{
+	repaint();
+}
+
+void Timeline2::updateSegmentsModified()
+{
+	repaint();
 }

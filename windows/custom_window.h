@@ -13,7 +13,7 @@ class CustomWindow : public QWidget
 		Q_OBJECT
 
 	public:
-		explicit CustomWindow(const QString &title, QWidget *parent = nullptr);
+		explicit CustomWindow(const QString &title);
 };
 
 

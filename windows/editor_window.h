@@ -20,7 +20,7 @@ class EditorWindow : public CustomWindow
 		Q_OBJECT
 
 	public:
-		explicit EditorWindow(QWidget *parent = nullptr);
+		explicit EditorWindow();
 
 		/**
 		 * This is a callback for the overlay

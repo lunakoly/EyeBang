@@ -62,7 +62,7 @@ void Overlay::cancel()
 void Overlay::askForText(
 	const QString &question,
 	const QObject *receiver,
-	AnswerReceiver callback
+	TextCallback callback
 )
 {
 	textInputPopupQuestion->setText(question);

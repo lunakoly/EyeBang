@@ -2,7 +2,7 @@ QT       += core gui multimedia multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++11
+CONFIG += c++17
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -21,24 +21,35 @@ SOURCES += \
     components/overlay.cpp \
     components/panel.cpp \
     components/timeline.cpp \
+    components/timeline_2.cpp \
     components/video_tab.cpp \
+    components/video_tab_2.cpp \
+    editing/project.cpp \
     layer.cpp \
     main.cpp \
     windows/custom_window.cpp \
-    windows/editor_window.cpp
+    windows/editor_window.cpp \
+    windows/editor_window_2.cpp \
+    windows/overlay_window.cpp
 
 HEADERS += \
+    aliases.h \
     components/better_line_edit.h \
     components/layer_select_button.h \
     components/overlay.h \
     components/panel.h \
     components/timeline.h \
+    components/timeline_2.h \
     components/video_tab.h \
+    components/video_tab_2.h \
+    editing/project.h \
     help.h \
     layer.h \
     segment.h \
     windows/custom_window.h \
-    windows/editor_window.h
+    windows/editor_window.h \
+    windows/editor_window_2.h \
+    windows/overlay_window.h
 
 FORMS +=
 

@@ -105,7 +105,7 @@ void EditorWindow::setupShortcuts()
 	connect(shortcutNewRightBound, &QShortcut::activated, this, &EditorWindow::doNewRightBound);
 }
 
-EditorWindow::EditorWindow(QWidget *parent) : CustomWindow(tr("EyeBang"), parent)
+EditorWindow::EditorWindow() : CustomWindow(tr("EyeBang"))
 {
 	setupActions();
 	setupMenu();
@@ -193,7 +193,7 @@ void EditorWindow::doTogglePlayback()
 
 void EditorWindow::doAddLayer()
 {
-	overlay->askForText("Layer Name", this, (Overlay::AnswerReceiver) &EditorWindow::doAddLayerOverlayCallback);
+	overlay->askForText("Layer Name", this, (TextCallback) &EditorWindow::doAddLayerOverlayCallback);
 }
 
 void EditorWindow::doAddLayerOverlayCallback(const QString &answer)

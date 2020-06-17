@@ -6,6 +6,7 @@
 #include <QTextEdit>
 #include <QLineEdit>
 
+#include "aliases.h"
 #include "components/better_line_edit.h"
 
 
@@ -23,17 +24,10 @@ class Overlay : public QWidget
 		explicit Overlay(QWidget *parent = nullptr);
 
 		/**
-		 * A type of a callback needed for accepting the
-		 * text answer. The one may need to cast their
-		 * funtion pointer to this type explicitly.
-		 */
-		using AnswerReceiver = void (QObject::*)(const QString &answer);
-
-		/**
 		 * Shows overlay and prompts for a line of text.
 		 * Suitable for prompting a name for something.
 		 */
-		void askForText(const QString &question, const QObject *receiver, AnswerReceiver callback);
+		void askForText(const QString &question, const QObject *receiver, TextCallback callback);
 
 	protected:
 		// dark transparent background is drawn here

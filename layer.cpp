@@ -31,7 +31,7 @@ void Layer::addSegment(const Segment &segment)
 
 	while (it < segments.size())
 	{
-		if (segment.begin < segments[it].begin && segments[it].end < segment.end)
+		if (segment.begin <= segments[it].begin && segments[it].end <= segment.end)
 		{
 			segments.remove(it);
 		}
