@@ -1,4 +1,4 @@
-#include "super_video_widget.h"
+#include "video_tab.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -17,7 +17,7 @@
 #define JUMP_SIZE 1000
 
 
-QLayout *SuperVideoWidget::createDetails()
+QLayout *VideoTab::createDetails()
 {
 	cursorTimeLabel = new QLabel(tr("Cursor: ") + timeToString(0), this);
 
@@ -37,7 +37,7 @@ QLayout *SuperVideoWidget::createDetails()
 	return details;
 }
 
-QScrollArea *SuperVideoWidget::createLayersArea()
+QScrollArea *VideoTab::createLayersArea()
 {
 	// here we have QScrollArea that must have
 	// it's own widget (set via setWidget). Trying to
@@ -69,7 +69,7 @@ QScrollArea *SuperVideoWidget::createLayersArea()
 	return layersListHolder;
 }
 
-SuperVideoWidget::SuperVideoWidget(QWidget *parent) : QWidget(parent)
+VideoTab::VideoTab(QWidget *parent) : QWidget(parent)
 {
 	mediaPlayer = new QMediaPlayer(this);
 	mediaPlayer->setNotifyInterval(16);
@@ -77,7 +77,7 @@ SuperVideoWidget::SuperVideoWidget(QWidget *parent) : QWidget(parent)
 	videoWidget = new QVideoWidget(this);
 	videoWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-	timeline = new TimelineWidget(this);
+	timeline = new Timeline(this);
 	timeline->setEnabled(false);
 
 	QVBoxLayout *main = new QVBoxLayout();
@@ -91,32 +91,32 @@ SuperVideoWidget::SuperVideoWidget(QWidget *parent) : QWidget(parent)
 
 	mediaPlayer->setVideoOutput(videoWidget);
 
-	connect(timeline, &TimelineWidget::sliderPressed,  this, &SuperVideoWidget::videoSliderPress);
-	connect(timeline, &TimelineWidget::sliderReleased, this, &SuperVideoWidget::videoSliderRelease);
+	connect(timeline, &Timeline::sliderPressed,  this, &VideoTab::videoSliderPress);
+	connect(timeline, &Timeline::sliderReleased, this, &VideoTab::videoSliderRelease);
 
-	connect(mediaPlayer, &QMediaPlayer::durationChanged, this, &SuperVideoWidget::mediaPlayerDurationChanged);
+	connect(mediaPlayer, &QMediaPlayer::durationChanged, this, &VideoTab::mediaPlayerDurationChanged);
 
-	connect(mediaPlayer, &QMediaPlayer::positionChanged, this, &SuperVideoWidget::mediaPlayerPositionChanged);
-	connect(timeline,    &TimelineWidget::valueChanged,  this, &SuperVideoWidget::videoSliderValueChanged);
+	connect(mediaPlayer, &QMediaPlayer::positionChanged, this, &VideoTab::mediaPlayerPositionChanged);
+	connect(timeline,    &Timeline::valueChanged,  this, &VideoTab::videoSliderValueChanged);
 
-	connect(timeline, &TimelineWidget::layerAdded,          this, &SuperVideoWidget::updateLayerAdded);
-	connect(timeline, &TimelineWidget::layerRemoved,        this, &SuperVideoWidget::updateLayerRemoved);
-	connect(timeline, &TimelineWidget::currentLayerChanged, this, &SuperVideoWidget::updateCurrentLayerChanged);
+	connect(timeline, &Timeline::layerAdded,          this, &VideoTab::updateLayerAdded);
+	connect(timeline, &Timeline::layerRemoved,        this, &VideoTab::updateLayerRemoved);
+	connect(timeline, &Timeline::currentLayerChanged, this, &VideoTab::updateCurrentLayerChanged);
 }
 
-QString SuperVideoWidget::timeToString(qint64 time)
+QString VideoTab::timeToString(qint64 time)
 {
 	return QDateTime::fromMSecsSinceEpoch(time).toUTC().toString("h:mm:ss.zzz");
 }
 
-void SuperVideoWidget::loadFromVideoFile(const QString &filename)
+void VideoTab::loadFromVideoFile(const QString &filename)
 {
 	mediaPlayer->setMedia(QUrl::fromLocalFile(filename));
 	timeline->setEnabled(true);
 	// now durationChanged is called
 }
 
-void SuperVideoWidget::mediaPlayerDurationChanged(qint64 duration)
+void VideoTab::mediaPlayerDurationChanged(qint64 duration)
 {
 	timeline->setMaximum(duration);
 	totalTimeLabel->setText(tr("Total: ") + timeToString(duration));
@@ -127,22 +127,22 @@ void SuperVideoWidget::mediaPlayerDurationChanged(qint64 duration)
 	resize(100, 100);
 }
 
-TimelineWidget *SuperVideoWidget::getTimeline()
+Timeline *VideoTab::getTimeline()
 {
 	return timeline;
 }
 
-void SuperVideoWidget::play()
+void VideoTab::play()
 {
 	mediaPlayer->play();
 }
 
-void SuperVideoWidget::pause()
+void VideoTab::pause()
 {
 	mediaPlayer->pause();
 }
 
-void SuperVideoWidget::togglePlayback()
+void VideoTab::togglePlayback()
 {
 	if (mediaPlayer->state() == QMediaPlayer::PlayingState)
 	{
@@ -154,7 +154,7 @@ void SuperVideoWidget::togglePlayback()
 	}
 }
 
-void SuperVideoWidget::stepLeft()
+void VideoTab::stepLeft()
 {
 	// isSeekable here to prevent scrolling before
 	// a video is loaded into the mediaPlayers.
@@ -166,7 +166,7 @@ void SuperVideoWidget::stepLeft()
 	}
 }
 
-void SuperVideoWidget::stepRight()
+void VideoTab::stepRight()
 {
 	if (!isSliderPressed && mediaPlayer->isSeekable())
 	{
@@ -175,7 +175,7 @@ void SuperVideoWidget::stepRight()
 	}
 }
 
-void SuperVideoWidget::jumpLeft()
+void VideoTab::jumpLeft()
 {
 	if (!isSliderPressed && mediaPlayer->isSeekable())
 	{
@@ -184,7 +184,7 @@ void SuperVideoWidget::jumpLeft()
 	}
 }
 
-void SuperVideoWidget::jumpRight()
+void VideoTab::jumpRight()
 {
 	if (!isSliderPressed && mediaPlayer->isSeekable())
 	{
@@ -193,7 +193,7 @@ void SuperVideoWidget::jumpRight()
 	}
 }
 
-void SuperVideoWidget::videoSliderPress()
+void VideoTab::videoSliderPress()
 {
 	wasPlayingBeforeSliderPress = mediaPlayer->state() == QMediaPlayer::PlayingState;
 
@@ -205,7 +205,7 @@ void SuperVideoWidget::videoSliderPress()
 	isSliderPressed = true;
 }
 
-void SuperVideoWidget::videoSliderRelease()
+void VideoTab::videoSliderRelease()
 {
 	if (wasPlayingBeforeSliderPress)
 	{
@@ -215,7 +215,7 @@ void SuperVideoWidget::videoSliderRelease()
 	isSliderPressed = false;
 }
 
-void SuperVideoWidget::mediaPlayerPositionChanged(qint64 position)
+void VideoTab::mediaPlayerPositionChanged(qint64 position)
 {
 	if (!isSliderPressed)
 	{
@@ -228,7 +228,7 @@ void SuperVideoWidget::mediaPlayerPositionChanged(qint64 position)
 	}
 }
 
-void SuperVideoWidget::videoSliderValueChanged(qint64 position)
+void VideoTab::videoSliderValueChanged(qint64 position)
 {
 	if (isSliderPressed)
 	{
@@ -241,20 +241,20 @@ void SuperVideoWidget::videoSliderValueChanged(qint64 position)
 	}
 }
 
-void SuperVideoWidget::updateLayerAdded(Layer *layer)
+void VideoTab::updateLayerAdded(Layer *layer)
 {
 	LayerSelectButton *button = new LayerSelectButton(layer, heightProvider);
 	layersList->addWidget(button);
-	connect(button, &LayerSelectButton::activated, this, &SuperVideoWidget::selectLayerByButton);
+	connect(button, &LayerSelectButton::activated, this, &VideoTab::selectLayerByButton);
 	button->setChecked(true);
 }
 
-void SuperVideoWidget::selectLayerByButton(Layer *layer)
+void VideoTab::selectLayerByButton(Layer *layer)
 {
 	timeline->setCurrentLayer(layer->name);
 }
 
-void SuperVideoWidget::updateLayerRemoved(Layer *layer)
+void VideoTab::updateLayerRemoved(Layer *layer)
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 
@@ -274,7 +274,7 @@ void SuperVideoWidget::updateLayerRemoved(Layer *layer)
 	}
 }
 
-void SuperVideoWidget::updateCurrentLayerChanged(Layer *newLayer)
+void VideoTab::updateCurrentLayerChanged(Layer *newLayer)
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 
@@ -294,7 +294,7 @@ void SuperVideoWidget::updateCurrentLayerChanged(Layer *newLayer)
 	}
 }
 
-void SuperVideoWidget::doSelectUpperLayer()
+void VideoTab::doSelectUpperLayer()
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 
@@ -314,7 +314,7 @@ void SuperVideoWidget::doSelectUpperLayer()
 	}
 }
 
-void SuperVideoWidget::doSelectLowerLayer()
+void VideoTab::doSelectLowerLayer()
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 

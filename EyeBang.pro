@@ -17,27 +17,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     components/better_line_edit.cpp \
-    components/custom_window.cpp \
     components/layer_select_button.cpp \
-    components/overlay_widget.cpp \
+    components/overlay.cpp \
     components/panel.cpp \
-    components/super_video_widget.cpp \
-    components/timeline_widget.cpp \
+    components/timeline.cpp \
+    components/video_tab.cpp \
     layer.cpp \
     main.cpp \
+    windows/custom_window.cpp \
     windows/editor_window.cpp
 
 HEADERS += \
     components/better_line_edit.h \
-    components/custom_window.h \
     components/layer_select_button.h \
-    components/overlay_widget.h \
+    components/overlay.h \
     components/panel.h \
-    components/super_video_widget.h \
-    components/timeline_widget.h \
+    components/timeline.h \
+    components/video_tab.h \
     help.h \
     layer.h \
     segment.h \
+    windows/custom_window.h \
     windows/editor_window.h
 
 FORMS +=

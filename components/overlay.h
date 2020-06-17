@@ -15,12 +15,12 @@
  * with QStackedLayout with setStackingMode
  * set to QStackedLayout::StackAll).
  */
-class OverlayWidget : public QWidget
+class Overlay : public QWidget
 {
 		Q_OBJECT
 
 	public:
-		explicit OverlayWidget(QWidget *parent = nullptr);
+		explicit Overlay(QWidget *parent = nullptr);
 
 		/**
 		 * A type of a callback needed for accepting the

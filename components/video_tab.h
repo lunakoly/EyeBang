@@ -9,7 +9,7 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 
-#include "timeline_widget.h"
+#include "timeline.h"
 #include "layer_select_button.h"
 
 
@@ -17,12 +17,12 @@
  * Holds the video widget, the timeline
  * and other related things.
  */
-class SuperVideoWidget : public QWidget
+class VideoTab : public QWidget
 {
 		Q_OBJECT
 
 	public:
-		explicit SuperVideoWidget(QWidget *parent = nullptr);
+		explicit VideoTab(QWidget *parent = nullptr);
 
 		/**
 		 * Loads the video from a file.
@@ -35,7 +35,7 @@ class SuperVideoWidget : public QWidget
 		 * of the timeline.
 		 * TODO: review required.
 		 */
-		TimelineWidget *getTimeline();
+		Timeline *getTimeline();
 
 		/**
 		 * Plays the video.
@@ -81,7 +81,7 @@ class SuperVideoWidget : public QWidget
 	protected:
 		QMediaPlayer *mediaPlayer;
 		QVideoWidget *videoWidget;
-		TimelineWidget *timeline;
+		Timeline *timeline;
 
 		// for some reason I couldn't get
 		// children of layersList so I started

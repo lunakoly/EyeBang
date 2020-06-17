@@ -1,5 +1,5 @@
 #include "editor_window.h"
-#include "components/super_video_widget.h"
+#include "components/video_tab.h"
 
 #include <QLabel>
 #include <QPushButton>
@@ -88,18 +88,18 @@ void EditorWindow::setupShortcuts()
 
 	connect(shortcutTogglePlayback, &QShortcut::activated, this, &EditorWindow::doTogglePlayback);
 
-	connect(shortcutStepLeft,  &QShortcut::activated, videoTab, &SuperVideoWidget::stepLeft);
-	connect(shortcutStepRight, &QShortcut::activated, videoTab, &SuperVideoWidget::stepRight);
-	connect(shortcutJumpLeft,  &QShortcut::activated, videoTab, &SuperVideoWidget::jumpLeft);
-	connect(shortcutJumpRight, &QShortcut::activated, videoTab, &SuperVideoWidget::jumpRight);
+	connect(shortcutStepLeft,  &QShortcut::activated, videoTab, &VideoTab::stepLeft);
+	connect(shortcutStepRight, &QShortcut::activated, videoTab, &VideoTab::stepRight);
+	connect(shortcutJumpLeft,  &QShortcut::activated, videoTab, &VideoTab::jumpLeft);
+	connect(shortcutJumpRight, &QShortcut::activated, videoTab, &VideoTab::jumpRight);
 
 	connect(shortcutAddLayer,    &QShortcut::activated, this, &EditorWindow::doAddLayer);
 	connect(shortcutRemoveLayer, &QShortcut::activated, this, &EditorWindow::doRemoveLayer);
 
-	connect(shortcutSelectUpperLayer, &QShortcut::activated, videoTab, &SuperVideoWidget::doSelectUpperLayer);
-	connect(shortcutSelectLowerLayer, &QShortcut::activated, videoTab, &SuperVideoWidget::doSelectLowerLayer);
+	connect(shortcutSelectUpperLayer, &QShortcut::activated, videoTab, &VideoTab::doSelectUpperLayer);
+	connect(shortcutSelectLowerLayer, &QShortcut::activated, videoTab, &VideoTab::doSelectLowerLayer);
 
-	connect(shortcutRecordSegment, &QShortcut::activated, videoTab->getTimeline(), &TimelineWidget::toggleRecord);
+	connect(shortcutRecordSegment, &QShortcut::activated, videoTab->getTimeline(), &Timeline::toggleRecord);
 
 	connect(shortcutNewLeftBound,  &QShortcut::activated, this, &EditorWindow::doNewLeftBound);
 	connect(shortcutNewRightBound, &QShortcut::activated, this, &EditorWindow::doNewRightBound);
@@ -110,13 +110,13 @@ EditorWindow::EditorWindow(QWidget *parent) : CustomWindow(tr("EyeBang"), parent
 	setupActions();
 	setupMenu();
 
-	videoTab = new SuperVideoWidget(this);
+	videoTab = new VideoTab(this);
 
 	QTabWidget *tabs = new QTabWidget(this);
 	tabs->setTabPosition(QTabWidget::West);
 	tabs->addTab(videoTab, tr("Video Tab"));
 
-	overlay = new OverlayWidget(this);
+	overlay = new Overlay(this);
 	// TODO: make proper access
 	videoTab->getTimeline()->overlay = overlay;
 
@@ -193,7 +193,7 @@ void EditorWindow::doTogglePlayback()
 
 void EditorWindow::doAddLayer()
 {
-	overlay->askForText("Layer Name", this, (OverlayWidget::AnswerReceiver) &EditorWindow::doAddLayerOverlayCallback);
+	overlay->askForText("Layer Name", this, (Overlay::AnswerReceiver) &EditorWindow::doAddLayerOverlayCallback);
 }
 
 void EditorWindow::doAddLayerOverlayCallback(const QString &answer)

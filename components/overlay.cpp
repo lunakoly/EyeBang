@@ -1,4 +1,4 @@
-#include "overlay_widget.h"
+#include "overlay.h"
 
 #include <QVBoxLayout>
 #include <QStackedLayout>
@@ -9,7 +9,7 @@
 #include "panel.h"
 
 
-void OverlayWidget::setupTextInputPopup()
+void Overlay::setupTextInputPopup()
 {
 	textInputPopup = new Panel(this);
 	textInputPopup->setFixedSize(250, 75);
@@ -25,7 +25,7 @@ void OverlayWidget::setupTextInputPopup()
 	textInputPopupContents->addWidget(textInputPopupText);
 }
 
-OverlayWidget::OverlayWidget(QWidget *parent) : QWidget(parent)
+Overlay::Overlay(QWidget *parent) : QWidget(parent)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setHidden(true);
@@ -40,7 +40,7 @@ OverlayWidget::OverlayWidget(QWidget *parent) : QWidget(parent)
 	popups->addWidget(textInputPopup);
 }
 
-void OverlayWidget::paintEvent(QPaintEvent *event)
+void Overlay::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -54,12 +54,12 @@ void OverlayWidget::paintEvent(QPaintEvent *event)
 	painter.restore();
 }
 
-void OverlayWidget::cancel()
+void Overlay::cancel()
 {
 	setHidden(true);
 }
 
-void OverlayWidget::askForText(
+void Overlay::askForText(
 	const QString &question,
 	const QObject *receiver,
 	AnswerReceiver callback
@@ -72,14 +72,14 @@ void OverlayWidget::askForText(
 	setHidden(false);
 
 	// esc pressed
-	connect(textInputPopupText, &BetterLineEdit::escape, this, &OverlayWidget::cancel);
+	connect(textInputPopupText, &BetterLineEdit::escape, this, &Overlay::cancel);
 
 	// call user code and hide the overlay
-	connect(textInputPopupText, &BetterLineEdit::submit, this, &OverlayWidget::textInputPopupSubmitted);
+	connect(textInputPopupText, &BetterLineEdit::submit, this, &Overlay::textInputPopupSubmitted);
 	connect(textInputPopupText, &BetterLineEdit::submit, receiver, callback);
 }
 
-void OverlayWidget::textInputPopupSubmitted(const QString &text)
+void Overlay::textInputPopupSubmitted(const QString &text)
 {
 	Q_UNUSED(text);
 	setHidden(true);

@@ -1,15 +1,15 @@
 #ifndef EDITORWINDOW_H
 #define EDITORWINDOW_H
 
-#include <components/custom_window.h>
-#include <components/super_video_widget.h>
+#include "custom_window.h"
+#include "components/video_tab.h"
 
 #include <QMenuBar>
 #include <QAction>
 #include <QShortcut>
 #include <QStackedLayout>
 
-#include "components/overlay_widget.h"
+#include "components/overlay.h"
 
 
 /**
@@ -73,8 +73,8 @@ class EditorWindow : public CustomWindow
 		void doNewRightBound();
 
 		QMenuBar *menuBar;
-		SuperVideoWidget *videoTab;
-		OverlayWidget *overlay;
+		VideoTab *videoTab;
+		Overlay *overlay;
 		QStackedLayout *layout;
 
 		void setupMenu();

@@ -1,4 +1,4 @@
-#include "timeline_widget.h"
+#include "timeline.h"
 
 #include <QPainter>
 #include <QtMath>
@@ -6,22 +6,22 @@
 #include <QPainterPath>
 
 
-TimelineWidget::TimelineWidget(QWidget *parent) : QWidget(parent)
+Timeline::Timeline(QWidget *parent) : QWidget(parent)
 {
 
 }
 
-QSize TimelineWidget::sizeHint() const
+QSize Timeline::sizeHint() const
 {
 	return QSize(70, 70);
 }
 
-int TimelineWidget::minimum()
+int Timeline::minimum()
 {
 	return minimumValue;
 }
 
-void TimelineWidget::setMinimum(int value)
+void Timeline::setMinimum(int value)
 {
 	minimumValue = value;
 
@@ -31,12 +31,12 @@ void TimelineWidget::setMinimum(int value)
 	}
 }
 
-int TimelineWidget::maximum()
+int Timeline::maximum()
 {
 	return maximumValue;
 }
 
-void TimelineWidget::setMaximum(int value)
+void Timeline::setMaximum(int value)
 {
 	maximumValue = value;
 
@@ -46,12 +46,12 @@ void TimelineWidget::setMaximum(int value)
 	}
 }
 
-int TimelineWidget::value()
+int Timeline::value()
 {
 	return currentValue;
 }
 
-void TimelineWidget::setValue(int value)
+void Timeline::setValue(int value)
 {
 	int oldValue = currentValue;
 	currentValue = value;
@@ -72,7 +72,7 @@ void TimelineWidget::setValue(int value)
 	}
 }
 
-Layer *TimelineWidget::addLayer(const QString &name)
+Layer *Timeline::addLayer(const QString &name)
 {	
 	if (!layers.contains(name))
 	{
@@ -92,7 +92,7 @@ Layer *TimelineWidget::addLayer(const QString &name)
 	return it;
 }
 
-Layer *TimelineWidget::removeLayer(const QString &name)
+Layer *Timeline::removeLayer(const QString &name)
 {
 	if (layers.contains(name))
 	{
@@ -119,7 +119,7 @@ Layer *TimelineWidget::removeLayer(const QString &name)
 	return nullptr;
 }
 
-Layer *TimelineWidget::getLayer(const QString &name)
+Layer *Timeline::getLayer(const QString &name)
 {
 	if (layers.contains(name))
 	{
@@ -129,17 +129,17 @@ Layer *TimelineWidget::getLayer(const QString &name)
 	return nullptr;
 }
 
-QList<Layer *> TimelineWidget::getLayers()
+QList<Layer *> Timeline::getLayers()
 {
 	return layers.values();
 }
 
-Layer *TimelineWidget::getCurrentLayer()
+Layer *Timeline::getCurrentLayer()
 {
 	return currentLayer;
 }
 
-Layer *TimelineWidget::setCurrentLayer(const QString &name)
+Layer *Timeline::setCurrentLayer(const QString &name)
 {
 	if (layers.contains(name))
 	{
@@ -152,7 +152,7 @@ Layer *TimelineWidget::setCurrentLayer(const QString &name)
 	return nullptr;
 }
 
-Layer *TimelineWidget::removeCurrentLayer()
+Layer *Timeline::removeCurrentLayer()
 {
 	if (currentLayer != nullptr)
 	{
@@ -165,7 +165,7 @@ Layer *TimelineWidget::removeCurrentLayer()
 	return nullptr;
 }
 
-void TimelineWidget::toggleRecord()
+void Timeline::toggleRecord()
 {
 	if (overlay != nullptr && !overlay->isHidden())
 	{
@@ -191,7 +191,7 @@ void TimelineWidget::toggleRecord()
 		{
 			if (overlay != nullptr)
 			{
-				overlay->askForText("New Layer Name", this, (OverlayWidget::AnswerReceiver) &TimelineWidget::finishNewLayer);
+				overlay->askForText("New Layer Name", this, (Overlay::AnswerReceiver) &Timeline::finishNewLayer);
 			}
 		}
 	}
@@ -204,7 +204,7 @@ void TimelineWidget::toggleRecord()
 	repaint();
 }
 
-void TimelineWidget::finishNewLayer(const QString &text)
+void Timeline::finishNewLayer(const QString &text)
 {
 	auto layer = addLayer(text);
 	layer->addSegment(recordedSegment);
@@ -212,7 +212,7 @@ void TimelineWidget::finishNewLayer(const QString &text)
 	repaint();
 }
 
-void TimelineWidget::paintEvent(QPaintEvent *event)
+void Timeline::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -324,7 +324,7 @@ void TimelineWidget::paintEvent(QPaintEvent *event)
 	painter.restore();
 }
 
-void TimelineWidget::mousePressEvent(QMouseEvent *event)
+void Timeline::mousePressEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -336,7 +336,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent *event)
 	}
 }
 
-void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
+void Timeline::mouseReleaseEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -346,7 +346,7 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
-void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
+void Timeline::mouseMoveEvent(QMouseEvent *event)
 {
 	if (isEnabled())
 	{
@@ -355,7 +355,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
-void TimelineWidget::recalculateCurrent(qreal position)
+void Timeline::recalculateCurrent(qreal position)
 {
 	int value = qRound((double) position / width() * (maximumValue - minimumValue)) + minimumValue;
 	setValue(value);

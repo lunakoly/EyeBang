@@ -8,7 +8,7 @@
 #include <QHash>
 
 #include "layer.h"
-#include "overlay_widget.h"
+#include "overlay.h"
 
 
 /**
@@ -16,15 +16,15 @@
  * It incapsulates layer management
  * as well.
  */
-class TimelineWidget : public QWidget
+class Timeline : public QWidget
 {
 		Q_OBJECT
 
 	public:
 		// TODO: make proper access
-		OverlayWidget *overlay = nullptr;
+		Overlay *overlay = nullptr;
 
-		explicit TimelineWidget(QWidget *parent = nullptr);
+		explicit Timeline(QWidget *parent = nullptr);
 
 		// defines the preferred size
 		// but layouts may ignore it if
