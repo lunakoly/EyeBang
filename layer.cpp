@@ -171,16 +171,3 @@ void Layer::setNewRightBound(int position)
 		}
 	}
 }
-
-bool Layer::canStart(int position)
-{
-	for (auto &it : segments)
-	{
-		if (it.begin <= position && position <= it.end)
-		{
-			return false;
-		}
-	}
-
-	return true;
-}

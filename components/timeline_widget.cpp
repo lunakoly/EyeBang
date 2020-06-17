@@ -172,11 +172,6 @@ void TimelineWidget::toggleRecord()
 		return;
 	}
 
-	if (currentLayer != nullptr && !currentLayer->canStart(currentValue))
-	{
-		return;
-	}
-
 	if (isRecording)
 	{
 		if (currentValue >= recordingStart)

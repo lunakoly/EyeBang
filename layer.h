@@ -7,7 +7,7 @@
 
 
 /**
- *	A named set of segments.
+ * A named set of segments.
  */
 class Layer : public QObject
 {
@@ -53,12 +53,6 @@ class Layer : public QObject
 		 * to the left of the positiion segment.
 		 */
 		void setNewRightBound(int position);
-
-		/**
-		 * Returns false if position is located
-		 * somewhere within the bounds of any segment.
-		 */
-		bool canStart(int position);
 
 	signals:
 		/**
