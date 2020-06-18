@@ -20,7 +20,7 @@
 #define JUMP_SIZE 1000
 
 
-QLayout *VideoTab2::createDetails()
+QLayout *VideoTab::createDetails()
 {
 	cursorTimeLabel = new QLabel(tr("Cursor: ") + timeToString(0), this);
 
@@ -40,7 +40,7 @@ QLayout *VideoTab2::createDetails()
 	return details;
 }
 
-QScrollArea *VideoTab2::createLayersArea()
+QScrollArea *VideoTab::createLayersArea()
 {
 	// here we have QScrollArea that must have
 	// it's own widget (set via setWidget). Trying to
@@ -72,7 +72,7 @@ QScrollArea *VideoTab2::createLayersArea()
 	return layersListHolder;
 }
 
-VideoTab2::VideoTab2(QWidget *parent) : QWidget(parent)
+VideoTab::VideoTab(QWidget *parent) : QWidget(parent)
 {
 	mediaPlayer = new QMediaPlayer(this);
 	mediaPlayer->setNotifyInterval(16);
@@ -81,7 +81,7 @@ VideoTab2::VideoTab2(QWidget *parent) : QWidget(parent)
 	videoWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 	mediaPlayer->setVideoOutput(videoWidget);
 
-	timeline = new Timeline2(this);
+	timeline = new Timeline(this);
 
 	QVBoxLayout *main = new QVBoxLayout();
 	main->addWidget(videoWidget);
@@ -92,22 +92,22 @@ VideoTab2::VideoTab2(QWidget *parent) : QWidget(parent)
 	layout->addLayout(main);
 	layout->addWidget(createLayersArea());
 
-	connect(timeline, &Timeline2::sliderPressed,  this, &VideoTab2::timelinePressed);
-	connect(timeline, &Timeline2::sliderReleased, this, &VideoTab2::timelineReleased);
+	connect(timeline, &Timeline::sliderPressed,  this, &VideoTab::timelinePressed);
+	connect(timeline, &Timeline::sliderReleased, this, &VideoTab::timelineReleased);
 
-	connect(mediaPlayer, &QMediaPlayer::durationChanged, this, &VideoTab2::mediaPlayerDurationChanged);
+	connect(mediaPlayer, &QMediaPlayer::durationChanged, this, &VideoTab::mediaPlayerDurationChanged);
 
-	connect(mediaPlayer, &QMediaPlayer::positionChanged, this, &VideoTab2::mediaPlayerPositionChanged);
-	connect(timeline,    &Timeline2::valueChanged,  this, &VideoTab2::timelineValueChanged);
+	connect(mediaPlayer, &QMediaPlayer::positionChanged, this, &VideoTab::mediaPlayerPositionChanged);
+	connect(timeline,    &Timeline::valueChanged,  this, &VideoTab::timelineValueChanged);
 
-	connect(timeline, &Timeline2::currentLayerChanged, this, &VideoTab2::currentLayerChanged);
+	connect(timeline, &Timeline::currentLayerChanged, this, &VideoTab::currentLayerChanged);
 
 	// will be enable when the project
 	// loads
 	setEnabled(false);
 }
 
-void VideoTab2::loadProject(Project *project)
+void VideoTab::loadProject(Project *project)
 {
 	if (project == nullptr)
 	{
@@ -122,11 +122,11 @@ void VideoTab2::loadProject(Project *project)
 		return;
 	}
 
-	connect(project, &Project::layerAdded,   this, &VideoTab2::layerAdded);
-	connect(project, &Project::layerRemoved, this, &VideoTab2::layerRemoved);
+	connect(project, &Project::layerAdded,   this, &VideoTab::layerAdded);
+	connect(project, &Project::layerRemoved, this, &VideoTab::layerRemoved);
 
-	connect(project, &Project::layerAdded,   timeline, &Timeline2::layerAdded);
-	connect(project, &Project::layerRemoved, timeline, &Timeline2::layerRemoved);
+	connect(project, &Project::layerAdded,   timeline, &Timeline::layerAdded);
+	connect(project, &Project::layerRemoved, timeline, &Timeline::layerRemoved);
 
 	this->project = project;
 	setEnabled(true);
@@ -135,7 +135,7 @@ void VideoTab2::loadProject(Project *project)
 	// now durationChanged is called
 }
 
-void VideoTab2::mediaPlayerDurationChanged(qint64 duration)
+void VideoTab::mediaPlayerDurationChanged(qint64 duration)
 {
 	timeline->setMaximum(duration);
 	totalTimeLabel->setText(tr("Total: ") + timeToString(duration));
@@ -146,12 +146,12 @@ void VideoTab2::mediaPlayerDurationChanged(qint64 duration)
 	resize(100, 100);
 }
 
-Timeline2 *VideoTab2::getTimeline()
+Timeline *VideoTab::getTimeline()
 {
 	return timeline;
 }
 
-void VideoTab2::togglePlayback()
+void VideoTab::togglePlayback()
 {
 	if (isEnabled())
 	{
@@ -166,7 +166,7 @@ void VideoTab2::togglePlayback()
 	}
 }
 
-void VideoTab2::stepLeft()
+void VideoTab::stepLeft()
 {
 	if (!isSliderPressed && isEnabled())
 	{
@@ -175,7 +175,7 @@ void VideoTab2::stepLeft()
 	}
 }
 
-void VideoTab2::stepRight()
+void VideoTab::stepRight()
 {
 	if (!isSliderPressed && isEnabled())
 	{
@@ -184,7 +184,7 @@ void VideoTab2::stepRight()
 	}
 }
 
-void VideoTab2::jumpLeft()
+void VideoTab::jumpLeft()
 {
 	if (!isSliderPressed && isEnabled())
 	{
@@ -193,7 +193,7 @@ void VideoTab2::jumpLeft()
 	}
 }
 
-void VideoTab2::jumpRight()
+void VideoTab::jumpRight()
 {
 	if (!isSliderPressed && isEnabled())
 	{
@@ -202,7 +202,7 @@ void VideoTab2::jumpRight()
 	}
 }
 
-void VideoTab2::selectUpperLayer()
+void VideoTab::selectUpperLayer()
 {
 	if (isEnabled())
 	{
@@ -225,7 +225,7 @@ void VideoTab2::selectUpperLayer()
 	}
 }
 
-void VideoTab2::selectLowerLayer()
+void VideoTab::selectLowerLayer()
 {
 	if (isEnabled())
 	{
@@ -248,12 +248,12 @@ void VideoTab2::selectLowerLayer()
 	}
 }
 
-QString VideoTab2::timeToString(qint64 time)
+QString VideoTab::timeToString(qint64 time)
 {
 	return QDateTime::fromMSecsSinceEpoch(time).toUTC().toString("h:mm:ss.zzz");
 }
 
-void VideoTab2::timelinePressed()
+void VideoTab::timelinePressed()
 {
 	wasPlayingBeforeSliderPress = mediaPlayer->state() == QMediaPlayer::PlayingState;
 
@@ -265,7 +265,7 @@ void VideoTab2::timelinePressed()
 	isSliderPressed = true;
 }
 
-void VideoTab2::timelineReleased()
+void VideoTab::timelineReleased()
 {
 	if (wasPlayingBeforeSliderPress)
 	{
@@ -275,7 +275,7 @@ void VideoTab2::timelineReleased()
 	isSliderPressed = false;
 }
 
-void VideoTab2::mediaPlayerPositionChanged(qint64 position)
+void VideoTab::mediaPlayerPositionChanged(qint64 position)
 {
 	if (!isSliderPressed)
 	{
@@ -288,7 +288,7 @@ void VideoTab2::mediaPlayerPositionChanged(qint64 position)
 	}
 }
 
-void VideoTab2::timelineValueChanged(qint64 position)
+void VideoTab::timelineValueChanged(qint64 position)
 {
 	if (isSliderPressed)
 	{
@@ -301,21 +301,21 @@ void VideoTab2::timelineValueChanged(qint64 position)
 	}
 }
 
-void VideoTab2::layerAdded(Layer *layer)
+void VideoTab::layerAdded(Layer *layer)
 {
 	LayerSelectButton *button = new LayerSelectButton(layer, heightProvider);
 	layersList->addWidget(button);
-	connect(button, &LayerSelectButton::activated, this, &VideoTab2::selectLayerByButton);
+	connect(button, &LayerSelectButton::activated, this, &VideoTab::selectLayerByButton);
 	button->setChecked(true);
 	timeline->setCurrentLayer(layer);
 }
 
-void VideoTab2::selectLayerByButton(Layer *layer)
+void VideoTab::selectLayerByButton(Layer *layer)
 {
 	timeline->setCurrentLayer(layer);
 }
 
-void VideoTab2::layerRemoved(Layer *layer)
+void VideoTab::layerRemoved(Layer *layer)
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 
@@ -347,7 +347,7 @@ void VideoTab2::layerRemoved(Layer *layer)
 	}
 }
 
-void VideoTab2::currentLayerChanged(Layer *newLayer)
+void VideoTab::currentLayerChanged(Layer *newLayer)
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 

@@ -13,12 +13,12 @@
 /**
  * The main window for the app.
  */
-class EditorWindow2 : public OverlayWindow
+class EditorWindow : public OverlayWindow
 {
 		Q_OBJECT
 
 	public:
-		EditorWindow2();
+		EditorWindow();
 
 	private:
 		Project *project = nullptr;
@@ -64,7 +64,7 @@ class EditorWindow2 : public OverlayWindow
 		void setupMenu();
 
 		Placeholder *videoTabPlaceholder;
-		VideoTab2 *videoTab;
+		VideoTab *videoTab;
 };
 
 

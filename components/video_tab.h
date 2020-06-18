@@ -19,12 +19,12 @@
  * Holds the video widget, the timeline
  * and other related things.
  */
-class VideoTab2 : public QWidget
+class VideoTab : public QWidget
 {
 		Q_OBJECT
 
 	public:
-		explicit VideoTab2(QWidget *parent = nullptr);
+		explicit VideoTab(QWidget *parent = nullptr);
 
 		/**
 		 * Loads the project and performs
@@ -36,7 +36,7 @@ class VideoTab2 : public QWidget
 		 * Returns the timeline. This simplifies
 		 * connecting timeline signals and slots.
 		 */
-		Timeline2 *getTimeline();
+		Timeline *getTimeline();
 
 		/**
 		 * Plays the video if paused.
@@ -75,7 +75,7 @@ class VideoTab2 : public QWidget
 		Project *project;
 
 		QMediaPlayer *mediaPlayer;
-		Timeline2 *timeline;
+		Timeline *timeline;
 		// for some reason I couldn't get
 		// children of layersList so I started
 		// parenting layer selection buttons to heightProvider

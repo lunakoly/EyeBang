@@ -1,4 +1,4 @@
-#include "editor_window_2.h"
+#include "editor_window.h"
 
 #include "editing/project.h"
 
@@ -8,7 +8,7 @@
 #include <QFileDialog>
 
 
-EditorWindow2::EditorWindow2() : OverlayWindow("Ranger")
+EditorWindow::EditorWindow() : OverlayWindow("Ranger")
 {
 	menuBar = new QMenuBar(this);
 	setMenuBar(menuBar);
@@ -20,10 +20,10 @@ EditorWindow2::EditorWindow2() : OverlayWindow("Ranger")
 	videoTabPlaceholder = new Placeholder(tr("Create a new project from a video file"), this);
 	tabs->addTab(videoTabPlaceholder, "Editing");
 
-	videoTab = new VideoTab2(this);
+	videoTab = new VideoTab(this);
 	videoTabPlaceholder->setContentWidget(videoTab);
 
-	connect(videoTab->getTimeline(), &Timeline2::requestAddNewLayer, this, [&](){
+	connect(videoTab->getTimeline(), &Timeline::requestAddNewLayer, this, [&](){
 		runAddLayer();
 	});
 
@@ -31,17 +31,17 @@ EditorWindow2::EditorWindow2() : OverlayWindow("Ranger")
 	setupMenu();
 }
 
-void EditorWindow2::setupActions()
+void EditorWindow::setupActions()
 {
 	actionAbout = new QAction(tr("About"), this);
 
-	connect(actionAbout, &QAction::triggered, this, &EditorWindow2::runAbout);
+	connect(actionAbout, &QAction::triggered, this, &EditorWindow::runAbout);
 
 	actionNewVideoFile = new QAction(tr("Video File"), this);
 	actionNewYouTube   = new QAction(tr("YouTube"),    this);
 
-	connect(actionNewVideoFile, &QAction::triggered, this, &EditorWindow2::runNewVideoFile);
-	connect(actionNewYouTube,   &QAction::triggered, this, &EditorWindow2::runNewYouTube);
+	connect(actionNewVideoFile, &QAction::triggered, this, &EditorWindow::runNewVideoFile);
+	connect(actionNewYouTube,   &QAction::triggered, this, &EditorWindow::runNewYouTube);
 
 	actionOpen = new QAction(tr("Open"), this);
 	actionSave = new QAction(tr("Save"), this);
@@ -49,20 +49,20 @@ void EditorWindow2::setupActions()
 	actionOpen->setShortcut(QKeySequence(Qt::Key_O));
 	actionSave->setShortcut(QKeySequence(Qt::Key_S));
 
-	connect(actionOpen, &QAction::triggered, this, &EditorWindow2::runNewVideoFile);
-	connect(actionSave, &QAction::triggered, this, &EditorWindow2::runSave);
+	connect(actionOpen, &QAction::triggered, this, &EditorWindow::runNewVideoFile);
+	connect(actionSave, &QAction::triggered, this, &EditorWindow::runSave);
 
 	actionLoadRangesFile   = new QAction(tr("Load Ranges File"),   this);
 	actionExportRangesFile = new QAction(tr("Export Ranges File"), this);
 
-	connect(actionLoadRangesFile,   &QAction::triggered, this, &EditorWindow2::runLoadRangesFile);
-	connect(actionExportRangesFile, &QAction::triggered, this, &EditorWindow2::runExportRangesFile);
+	connect(actionLoadRangesFile,   &QAction::triggered, this, &EditorWindow::runLoadRangesFile);
+	connect(actionExportRangesFile, &QAction::triggered, this, &EditorWindow::runExportRangesFile);
 
 	actionTogglePlayback = new QAction(tr("Toggle Playback"), this);
 
 	actionTogglePlayback->setShortcut(QKeySequence(Qt::Key_Space));
 
-	connect(actionTogglePlayback, &QAction::triggered, videoTab, &VideoTab2::togglePlayback);
+	connect(actionTogglePlayback, &QAction::triggered, videoTab, &VideoTab::togglePlayback);
 
 	actionStepLeft  = new QAction(tr("Step Left"),  this);
 	actionStepRight = new QAction(tr("Step Right"), this);
@@ -74,10 +74,10 @@ void EditorWindow2::setupActions()
 	actionJumpLeft ->setShortcut(QKeySequence(Qt::Key_A));
 	actionJumpRight->setShortcut(QKeySequence(Qt::Key_D));
 
-	connect(actionStepLeft,  &QAction::triggered, videoTab, &VideoTab2::stepLeft);
-	connect(actionStepRight, &QAction::triggered, videoTab, &VideoTab2::stepRight);
-	connect(actionJumpLeft,  &QAction::triggered, videoTab, &VideoTab2::jumpLeft);
-	connect(actionJumpRight, &QAction::triggered, videoTab, &VideoTab2::jumpRight);
+	connect(actionStepLeft,  &QAction::triggered, videoTab, &VideoTab::stepLeft);
+	connect(actionStepRight, &QAction::triggered, videoTab, &VideoTab::stepRight);
+	connect(actionJumpLeft,  &QAction::triggered, videoTab, &VideoTab::jumpLeft);
+	connect(actionJumpRight, &QAction::triggered, videoTab, &VideoTab::jumpRight);
 
 	actionAddLayer    = new QAction(tr("Add Layer"),    this);
 	actionRemoveLayer = new QAction(tr("Remove Layer"), this);
@@ -85,8 +85,8 @@ void EditorWindow2::setupActions()
 	actionAddLayer   ->setShortcut(QKeySequence(Qt::Key_L));
 	actionRemoveLayer->setShortcut(QKeySequence(Qt::Key_R));
 
-	connect(actionAddLayer,    &QAction::triggered, this, &EditorWindow2::runAddLayer);
-	connect(actionRemoveLayer, &QAction::triggered, this, &EditorWindow2::runRemoveLayer);
+	connect(actionAddLayer,    &QAction::triggered, this, &EditorWindow::runAddLayer);
+	connect(actionRemoveLayer, &QAction::triggered, this, &EditorWindow::runRemoveLayer);
 
 	actionSelectUpperLayer = new QAction(tr("Select Upper Layer"), this);
 	actionSelectLowerLayer = new QAction(tr("Select Lower Layer"), this);
@@ -94,14 +94,14 @@ void EditorWindow2::setupActions()
 	actionSelectUpperLayer->setShortcut(QKeySequence(Qt::Key_Up));
 	actionSelectLowerLayer->setShortcut(QKeySequence(Qt::Key_Down));
 
-	connect(actionSelectUpperLayer, &QAction::triggered, videoTab, &VideoTab2::selectUpperLayer);
-	connect(actionSelectLowerLayer, &QAction::triggered, videoTab, &VideoTab2::selectLowerLayer);
+	connect(actionSelectUpperLayer, &QAction::triggered, videoTab, &VideoTab::selectUpperLayer);
+	connect(actionSelectLowerLayer, &QAction::triggered, videoTab, &VideoTab::selectLowerLayer);
 
 	actionRecordSegment = new QAction(tr("Record Segment"), this);
 
 	actionRecordSegment->setShortcut(QKeySequence(Qt::Key_G));
 
-	connect(actionRecordSegment, &QAction::triggered, videoTab->getTimeline(), &Timeline2::toggleRecord);
+	connect(actionRecordSegment, &QAction::triggered, videoTab->getTimeline(), &Timeline::toggleRecord);
 
 	actionNewLeftBound  = new QAction(tr("Set New Left Bound"),  this);
 	actionNewRightBound = new QAction(tr("Set New Right Bound"), this);
@@ -109,11 +109,11 @@ void EditorWindow2::setupActions()
 	actionNewLeftBound ->setShortcut(QKeySequence(Qt::Key_BracketLeft));
 	actionNewRightBound->setShortcut(QKeySequence(Qt::Key_BracketRight));
 
-	connect(actionNewLeftBound,  &QAction::triggered, this, &EditorWindow2::runNewLeftBound);
-	connect(actionNewRightBound, &QAction::triggered, this, &EditorWindow2::runNewRightBound);
+	connect(actionNewLeftBound,  &QAction::triggered, this, &EditorWindow::runNewLeftBound);
+	connect(actionNewRightBound, &QAction::triggered, this, &EditorWindow::runNewRightBound);
 }
 
-void EditorWindow2::setupMenu()
+void EditorWindow::setupMenu()
 {
 	// I found these indents handy
 	QMenu *fileMenu = menuBar->addMenu(tr("File"));
@@ -148,12 +148,12 @@ void EditorWindow2::setupMenu()
 		helpMenu->addAction(actionAbout);
 }
 
-void EditorWindow2::runAbout()
+void EditorWindow::runAbout()
 {
 	QMessageBox::about(this, tr("About"), tr("EyeBang v0.0.2"));
 }
 
-void EditorWindow2::runNewVideoFile()
+void EditorWindow::runNewVideoFile()
 {
 	QString filename = QFileDialog::getOpenFileName(this, tr("Choose a video file"));
 
@@ -176,40 +176,40 @@ void EditorWindow2::runNewVideoFile()
 	videoTabPlaceholder->showContent();
 }
 
-void EditorWindow2::runNewYouTube()
+void EditorWindow::runNewYouTube()
 {
 	QMessageBox::critical(this, tr("TODO"), tr("The feature hasn't been implemented."));
 }
 
-void EditorWindow2::runOpen()
+void EditorWindow::runOpen()
 {
 	QMessageBox::critical(this, tr("TODO"), tr("The feature hasn't been implemented."));
 }
 
-void EditorWindow2::runSave()
+void EditorWindow::runSave()
 {
 	QMessageBox::critical(this, tr("TODO"), tr("The feature hasn't been implemented."));
 }
 
-void EditorWindow2::runLoadRangesFile()
+void EditorWindow::runLoadRangesFile()
 {
 	QMessageBox::critical(this, tr("TODO"), tr("The feature hasn't been implemented."));
 }
 
-void EditorWindow2::runExportRangesFile()
+void EditorWindow::runExportRangesFile()
 {
 	QMessageBox::critical(this, tr("TODO"), tr("The feature hasn't been implemented."));
 }
 
-void EditorWindow2::runAddLayer()
+void EditorWindow::runAddLayer()
 {
 	if (project != nullptr)
 	{
-		overlay->askForText("New Layer Name", this, (TextCallback) &EditorWindow2::receiveNewLayerName);
+		overlay->askForText("New Layer Name", this, (TextCallback) &EditorWindow::receiveNewLayerName);
 	}
 }
 
-void EditorWindow2::receiveNewLayerName(bool isCanceled, const QString &name)
+void EditorWindow::receiveNewLayerName(bool isCanceled, const QString &name)
 {
 	if (isCanceled)
 	{
@@ -221,7 +221,7 @@ void EditorWindow2::receiveNewLayerName(bool isCanceled, const QString &name)
 	}
 }
 
-void EditorWindow2::runRemoveLayer()
+void EditorWindow::runRemoveLayer()
 {
 	if (project != nullptr)
 	{
@@ -229,7 +229,7 @@ void EditorWindow2::runRemoveLayer()
 	}
 }
 
-void EditorWindow2::runNewLeftBound()
+void EditorWindow::runNewLeftBound()
 {
 	auto timeline = videoTab->getTimeline();
 
@@ -239,7 +239,7 @@ void EditorWindow2::runNewLeftBound()
 	}
 }
 
-void EditorWindow2::runNewRightBound()
+void EditorWindow::runNewRightBound()
 {
 	auto timeline = videoTab->getTimeline();
 

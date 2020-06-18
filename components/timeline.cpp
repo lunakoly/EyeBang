@@ -6,22 +6,22 @@
 #include <QPainterPath>
 
 
-Timeline2::Timeline2(QWidget *parent) : QWidget(parent)
+Timeline::Timeline(QWidget *parent) : QWidget(parent)
 {
 
 }
 
-QSize Timeline2::sizeHint() const
+QSize Timeline::sizeHint() const
 {
 	return QSize(70, 70);
 }
 
-int Timeline2::minimum()
+int Timeline::minimum()
 {
 	return minimumValue;
 }
 
-void Timeline2::setMinimum(int value)
+void Timeline::setMinimum(int value)
 {
 	minimumValue = value;
 
@@ -31,12 +31,12 @@ void Timeline2::setMinimum(int value)
 	}
 }
 
-int Timeline2::maximum()
+int Timeline::maximum()
 {
 	return maximumValue;
 }
 
-void Timeline2::setMaximum(int value)
+void Timeline::setMaximum(int value)
 {
 	maximumValue = value;
 
@@ -46,12 +46,12 @@ void Timeline2::setMaximum(int value)
 	}
 }
 
-int Timeline2::value()
+int Timeline::value()
 {
 	return currentValue;
 }
 
-void Timeline2::setValue(int value)
+void Timeline::setValue(int value)
 {
 	int oldValue = currentValue;
 	currentValue = value;
@@ -72,12 +72,12 @@ void Timeline2::setValue(int value)
 	}
 }
 
-Layer *Timeline2::getCurrentLayer()
+Layer *Timeline::getCurrentLayer()
 {
 	return currentLayer;
 }
 
-Layer *Timeline2::setCurrentLayer(Layer *layer)
+Layer *Timeline::setCurrentLayer(Layer *layer)
 {
 	auto oldLayer = currentLayer;
 	currentLayer = layer;
@@ -91,7 +91,7 @@ Layer *Timeline2::setCurrentLayer(Layer *layer)
 	return currentLayer;
 }
 
-void Timeline2::toggleRecord()
+void Timeline::toggleRecord()
 {
 	if (!isEnabled())
 	{
@@ -137,11 +137,11 @@ void Timeline2::toggleRecord()
 	// repaint();
 }
 
-void Timeline2::layerAdded(Layer *layer)
+void Timeline::layerAdded(Layer *layer)
 {
-	connect(layer, &Layer::segmentAdded,     this, &Timeline2::segmentAdded);
-	connect(layer, &Layer::segmentRemoved,   this, &Timeline2::segmentRemoved);
-	connect(layer, &Layer::segmentsModified, this, &Timeline2::segmentsModified);
+	connect(layer, &Layer::segmentAdded,     this, &Timeline::segmentAdded);
+	connect(layer, &Layer::segmentRemoved,   this, &Timeline::segmentRemoved);
+	connect(layer, &Layer::segmentsModified, this, &Timeline::segmentsModified);
 
 	if (isReadyToSaveRecording)
 	{
@@ -150,19 +150,19 @@ void Timeline2::layerAdded(Layer *layer)
 	}
 }
 
-void Timeline2::layerRemoved(Layer *layer)
+void Timeline::layerRemoved(Layer *layer)
 {
-	disconnect(layer, &Layer::segmentAdded,     this, &Timeline2::segmentAdded);
-	disconnect(layer, &Layer::segmentRemoved,   this, &Timeline2::segmentRemoved);
-	disconnect(layer, &Layer::segmentsModified, this, &Timeline2::segmentsModified);
+	disconnect(layer, &Layer::segmentAdded,     this, &Timeline::segmentAdded);
+	disconnect(layer, &Layer::segmentRemoved,   this, &Timeline::segmentRemoved);
+	disconnect(layer, &Layer::segmentsModified, this, &Timeline::segmentsModified);
 }
 
-void Timeline2::notifyAddLayerCanceled()
+void Timeline::notifyAddLayerCanceled()
 {
 	isReadyToSaveRecording = false;
 }
 
-void Timeline2::paintEvent(QPaintEvent *event)
+void Timeline::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -274,7 +274,7 @@ void Timeline2::paintEvent(QPaintEvent *event)
 	painter.restore();
 }
 
-void Timeline2::mousePressEvent(QMouseEvent *event)
+void Timeline::mousePressEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -286,7 +286,7 @@ void Timeline2::mousePressEvent(QMouseEvent *event)
 	}
 }
 
-void Timeline2::mouseReleaseEvent(QMouseEvent *event)
+void Timeline::mouseReleaseEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event);
 
@@ -296,7 +296,7 @@ void Timeline2::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
-void Timeline2::mouseMoveEvent(QMouseEvent *event)
+void Timeline::mouseMoveEvent(QMouseEvent *event)
 {
 	if (isEnabled())
 	{
@@ -305,23 +305,23 @@ void Timeline2::mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
-void Timeline2::recalculateCurrent(qreal position)
+void Timeline::recalculateCurrent(qreal position)
 {
 	int value = qRound((double) position / width() * (maximumValue - minimumValue)) + minimumValue;
 	setValue(value);
 }
 
-void Timeline2::segmentAdded(const Segment &)
+void Timeline::segmentAdded(const Segment &)
 {
 	repaint();
 }
 
-void Timeline2::segmentRemoved(Segment)
+void Timeline::segmentRemoved(Segment)
 {
 	repaint();
 }
 
-void Timeline2::segmentsModified()
+void Timeline::segmentsModified()
 {
 	repaint();
 }

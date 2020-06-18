@@ -27,7 +27,7 @@ SOURCES += \
     editing/project.cpp \
     main.cpp \
     windows/custom_window.cpp \
-    windows/editor_window_2.cpp \
+    windows/editor_window.cpp \
     windows/overlay_window.cpp
 
 HEADERS += \
@@ -44,7 +44,7 @@ HEADERS += \
     editing/segment.h \
     help.h \
     windows/custom_window.h \
-    windows/editor_window_2.h \
+    windows/editor_window.h \
     windows/overlay_window.h
 
 FORMS +=

@@ -1,7 +1,7 @@
 #include <QApplication>
 
 #include "help.h"
-#include "windows/editor_window_2.h"
+#include "windows/editor_window.h"
 
 
 int main(int argc, char *argv[])
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 	// menuBar = new QMenuBar(this);
 	// menuBar->setStyle(platformStyle);
 
-	EditorWindow2 window2;
+	EditorWindow window2;
 	window2.show();
 
 	return application.exec();
