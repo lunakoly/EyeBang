@@ -59,5 +59,5 @@ QList<Layer *> Project::getLayers()
 
 bool Project::hasLayers()
 {
-	return layers.isEmpty();
+	return !layers.isEmpty();
 }

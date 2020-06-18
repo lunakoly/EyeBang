@@ -16,11 +16,11 @@ void BetterLineEdit::keyPressEvent(QKeyEvent *event)
 {
 	if (event->key() == Qt::Key_Return && !text().isEmpty())
 	{
-		emit submit(text());
+		emit submit(false, text());
 	}
 	else if (event->key() == Qt::Key_Escape)
 	{
-		emit escape();
+		emit submit(true, "");
 	}
 	else
 	{

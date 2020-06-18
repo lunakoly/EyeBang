@@ -93,6 +93,14 @@ class Timeline2 : public QWidget
 		 */
 		void layerRemoved(Layer *layer);
 
+		/**
+		 * Called after the recording requested
+		 * new layer creation to notify
+		 * the timeline that it needs to cancel
+		 * the recording mode and discard the result.
+		 */
+		void notifyAddLayerCanceled();
+
 	signals:
 		/**
 		 * Just a signal like the one we have
@@ -121,7 +129,7 @@ class Timeline2 : public QWidget
 		 */
 		void requestAddNewLayer();
 
-	protected:
+	private:
 		int minimumValue = 0;
 		int maximumValue = 100;
 
@@ -142,7 +150,6 @@ class Timeline2 : public QWidget
 
 		QHash<QString, Layer*> layers;
 
-	private:
 		// the last recorded segment.
 		// we need to wait until the user
 		// types in the name for the layer
@@ -156,9 +163,9 @@ class Timeline2 : public QWidget
 		void recalculateCurrent(qreal position);
 
 		// these funcs trigger repaint()
-		void updateSegmentAdded(const Segment &);
-		void updateSegmentRemoved(Segment);
-		void updateSegmentsModified();
+		void segmentAdded(const Segment &);
+		void segmentRemoved(Segment);
+		void segmentsModified();
 };
 
 

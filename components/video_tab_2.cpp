@@ -100,116 +100,11 @@ VideoTab2::VideoTab2(QWidget *parent) : QWidget(parent)
 	connect(mediaPlayer, &QMediaPlayer::positionChanged, this, &VideoTab2::mediaPlayerPositionChanged);
 	connect(timeline,    &Timeline2::valueChanged,  this, &VideoTab2::timelineValueChanged);
 
-	connect(timeline, &Timeline2::currentLayerChanged, this, &VideoTab2::updateCurrentLayerChanged);
+	connect(timeline, &Timeline2::currentLayerChanged, this, &VideoTab2::currentLayerChanged);
 
-	connect(timeline, &Timeline2::requestAddNewLayer, this, [&](){
-		if (project != nullptr)
-		{
-			emit userInputTextRequired("New Layer Name", this, (TextCallback) &VideoTab2::doAddLayer);
-		}
-	});
-
-	setupShortcuts();
-}
-
-void VideoTab2::setupShortcuts()
-{
-	shortcutTogglePlayback = new QShortcut(QKeySequence(Qt::Key_Space), this);
-
-	connect(shortcutTogglePlayback, &QShortcut::activated, this, [&](){
-		if (mediaPlayer->state() == QMediaPlayer::PlayingState)
-		{
-			mediaPlayer->pause();
-		}
-		else
-		{
-			mediaPlayer->play();
-		}
-	});
-
-	shortcutStepLeft  = new QShortcut(QKeySequence(Qt::Key_A + Qt::SHIFT), this);
-	shortcutStepRight = new QShortcut(QKeySequence(Qt::Key_D + Qt::SHIFT), this);
-	shortcutJumpLeft  = new QShortcut(QKeySequence(Qt::Key_A),             this);
-	shortcutJumpRight = new QShortcut(QKeySequence(Qt::Key_D),             this);
-
-	connect(shortcutStepLeft, &QShortcut::activated, this, [&](){
-		if (!isSliderPressed)
-		{
-			qint64 position = mediaPlayer->position() - STEP_SIZE;
-			mediaPlayer->setPosition(position);
-		}
-	});
-	connect(shortcutStepRight, &QShortcut::activated, this, [&](){
-		if (!isSliderPressed)
-		{
-			qint64 position = mediaPlayer->position() + STEP_SIZE;
-			mediaPlayer->setPosition(position);
-		}
-	});
-	connect(shortcutJumpLeft, &QShortcut::activated, this, [&](){
-		if (!isSliderPressed)
-		{
-			qint64 position = mediaPlayer->position() - JUMP_SIZE;
-			mediaPlayer->setPosition(position);
-		}
-	});
-	connect(shortcutJumpRight, &QShortcut::activated, this, [&](){
-		if (!isSliderPressed)
-		{
-			qint64 position = mediaPlayer->position() + JUMP_SIZE;
-			mediaPlayer->setPosition(position);
-		}
-	});
-
-	shortcutAddLayer    = new QShortcut(QKeySequence(Qt::Key_L), this);
-	shortcutRemoveLayer = new QShortcut(QKeySequence(Qt::Key_R), this);
-
-	connect(shortcutAddLayer, &QShortcut::activated, this, [&](){
-		if (project != nullptr)
-		{
-			emit userInputTextRequired("New Layer Name", this, (TextCallback) &VideoTab2::doAddLayer);
-		}
-	});
-	connect(shortcutRemoveLayer, &QShortcut::activated, this, [&](){
-		if (project != nullptr)
-		{
-			project->removeLayer(timeline->getCurrentLayer()->name);
-		}
-	});
-
-	shortcutSelectUpperLayer = new QShortcut(QKeySequence(Qt::Key_Up), this);
-	shortcutSelectLowerLayer = new QShortcut(QKeySequence(Qt::Key_Down), this);
-
-	connect(shortcutSelectUpperLayer, &QShortcut::activated, this, &VideoTab2::doSelectUpperLayer);
-	connect(shortcutSelectLowerLayer, &QShortcut::activated, this, &VideoTab2::doSelectLowerLayer);
-
-	shortcutRecordSegment = new QShortcut(QKeySequence(Qt::Key_G), this);
-
-	connect(shortcutRecordSegment, &QShortcut::activated, timeline, &Timeline2::toggleRecord);
-
-	shortcutNewLeftBound  = new QShortcut(QKeySequence(Qt::Key_BracketLeft),  this);
-	shortcutNewRightBound = new QShortcut(QKeySequence(Qt::Key_BracketRight), this);
-
-	connect(shortcutNewLeftBound,  &QShortcut::activated, this, [&](){
-		if (timeline->getCurrentLayer() != nullptr)
-		{
-			timeline->getCurrentLayer()->setNewLeftBound(timeline->value());
-		}
-	});
-	connect(shortcutNewRightBound, &QShortcut::activated, this, [&](){
-		if (timeline->getCurrentLayer() != nullptr)
-		{
-			timeline->getCurrentLayer()->setNewRightBound(timeline->value());
-		}
-	});
-}
-
-void VideoTab2::doAddLayer(const QString &name)
-{
-	if (project != nullptr)
-	{
-		project->addLayer(name);
-	}
+	// will be enable when the project
+	// loads
+	setEnabled(false);
 }
 
 void VideoTab2::loadProject(Project *project)
@@ -227,14 +122,16 @@ void VideoTab2::loadProject(Project *project)
 		return;
 	}
 
-	connect(project, &Project::layerAdded,   this, &VideoTab2::updateLayerAdded);
-	connect(project, &Project::layerRemoved, this, &VideoTab2::updateLayerRemoved);
+	connect(project, &Project::layerAdded,   this, &VideoTab2::layerAdded);
+	connect(project, &Project::layerRemoved, this, &VideoTab2::layerRemoved);
 
 	connect(project, &Project::layerAdded,   timeline, &Timeline2::layerAdded);
 	connect(project, &Project::layerRemoved, timeline, &Timeline2::layerRemoved);
 
-	mediaPlayer->setMedia(QUrl::fromLocalFile(project->getVideoFile()));
 	this->project = project;
+	setEnabled(true);
+
+	mediaPlayer->setMedia(QUrl::fromLocalFile(project->getVideoFile()));
 	// now durationChanged is called
 }
 
@@ -249,54 +146,111 @@ void VideoTab2::mediaPlayerDurationChanged(qint64 duration)
 	resize(100, 100);
 }
 
-bool VideoTab2::isMediaAvailable()
+Timeline2 *VideoTab2::getTimeline()
 {
-	return mediaPlayer->isSeekable();
+	return timeline;
+}
+
+void VideoTab2::togglePlayback()
+{
+	if (isEnabled())
+	{
+		if (mediaPlayer->state() == QMediaPlayer::PlayingState)
+		{
+			mediaPlayer->pause();
+		}
+		else
+		{
+			mediaPlayer->play();
+		}
+	}
+}
+
+void VideoTab2::stepLeft()
+{
+	if (!isSliderPressed && isEnabled())
+	{
+		qint64 position = mediaPlayer->position() - STEP_SIZE;
+		mediaPlayer->setPosition(position);
+	}
+}
+
+void VideoTab2::stepRight()
+{
+	if (!isSliderPressed && isEnabled())
+	{
+		qint64 position = mediaPlayer->position() + STEP_SIZE;
+		mediaPlayer->setPosition(position);
+	}
+}
+
+void VideoTab2::jumpLeft()
+{
+	if (!isSliderPressed && isEnabled())
+	{
+		qint64 position = mediaPlayer->position() - JUMP_SIZE;
+		mediaPlayer->setPosition(position);
+	}
+}
+
+void VideoTab2::jumpRight()
+{
+	if (!isSliderPressed && isEnabled())
+	{
+		qint64 position = mediaPlayer->position() + JUMP_SIZE;
+		mediaPlayer->setPosition(position);
+	}
+}
+
+void VideoTab2::selectUpperLayer()
+{
+	if (isEnabled())
+	{
+		QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
+
+		if (!buttons.isEmpty())
+		{
+			int it = 0;
+
+			while (it < buttons.size() && !buttons[it]->isChecked())
+			{
+				it += 1;
+			}
+
+			if (0 < it && it < buttons.size())
+			{
+				buttons[it - 1]->setChecked(true);
+			}
+		}
+	}
+}
+
+void VideoTab2::selectLowerLayer()
+{
+	if (isEnabled())
+	{
+		QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
+
+		if (!buttons.isEmpty())
+		{
+			int it = buttons.size() - 1;
+
+			while (it >= 0 && !buttons[it]->isChecked())
+			{
+				it -= 1;
+			}
+
+			if (0 <= it && it < buttons.size() - 1)
+			{
+				buttons[it + 1]->setChecked(true);
+			}
+		}
+	}
 }
 
 QString VideoTab2::timeToString(qint64 time)
 {
 	return QDateTime::fromMSecsSinceEpoch(time).toUTC().toString("h:mm:ss.zzz");
-}
-
-void VideoTab2::doSelectUpperLayer()
-{
-	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
-
-	if (!buttons.isEmpty())
-	{
-		int it = 0;
-
-		while (it < buttons.size() && !buttons[it]->isChecked())
-		{
-			it += 1;
-		}
-
-		if (0 < it && it < buttons.size())
-		{
-			buttons[it - 1]->setChecked(true);
-		}
-	}
-}
-
-void VideoTab2::doSelectLowerLayer()
-{
-	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
-
-	if (!buttons.isEmpty())
-	{
-		int it = buttons.size() - 1;
-
-		while (it >= 0 && !buttons[it]->isChecked())
-		{
-			it -= 1;
-		}
-
-		if (0 <= it && it < buttons.size() - 1)
-		{
-			buttons[it + 1]->setChecked(true);
-		}
-	}
 }
 
 void VideoTab2::timelinePressed()
@@ -347,7 +301,7 @@ void VideoTab2::timelineValueChanged(qint64 position)
 	}
 }
 
-void VideoTab2::updateLayerAdded(Layer *layer)
+void VideoTab2::layerAdded(Layer *layer)
 {
 	LayerSelectButton *button = new LayerSelectButton(layer, heightProvider);
 	layersList->addWidget(button);
@@ -361,7 +315,7 @@ void VideoTab2::selectLayerByButton(Layer *layer)
 	timeline->setCurrentLayer(layer);
 }
 
-void VideoTab2::updateLayerRemoved(Layer *layer)
+void VideoTab2::layerRemoved(Layer *layer)
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 
@@ -376,7 +330,7 @@ void VideoTab2::updateLayerRemoved(Layer *layer)
 
 		if (it < buttons.size())
 		{
-			layersList->removeWidget(buttons[it]);
+			buttons[it]->deleteLater();
 		}
 	}
 
@@ -393,7 +347,7 @@ void VideoTab2::updateLayerRemoved(Layer *layer)
 	}
 }
 
-void VideoTab2::updateCurrentLayerChanged(Layer *newLayer)
+void VideoTab2::currentLayerChanged(Layer *newLayer)
 {
 	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
 

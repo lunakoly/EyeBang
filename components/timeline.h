@@ -119,7 +119,7 @@ class Timeline : public QWidget
 		 * layer name as the parameter.
 		 * (So, it's a callback).
 		 */
-		void finishNewLayer(const QString &text);
+		void finishNewLayer(bool isCanceled, const QString &text);
 
 	signals:
 		/**

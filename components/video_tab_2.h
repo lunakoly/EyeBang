@@ -33,80 +33,44 @@ class VideoTab2 : public QWidget
 		void loadProject(Project *project);
 
 		/**
-		 * Returns true if the video file is
-		 * loaded and ready to be used.
+		 * Returns the timeline. This simplifies
+		 * connecting timeline signals and slots.
 		 */
-		bool isMediaAvailable();
+		Timeline2 *getTimeline();
 
-//		/**
-//		 * Plays the video.
-//		 */
-//		void play();
-//		/**
-//		 * Pauses the video.
-//		 */
-//		void pause();
-//		/**
-//		 * Plays the video if paused.
-//		 * Pauses otherwise.
-//		 */
-//		void togglePlayback();
-
-//		/**
-//		 * Makes a small step to the left.
-//		 */
-//		void stepLeft();
-//		/**
-//		 * Makes a small step to the right.
-//		 */
-//		void stepRight();
-//		/**
-//		 * Makes a big step to the left.
-//		 */
-//		void jumpLeft();
-//		/**
-//		 * Makes a big step to the right.
-//		 */
-//		void jumpRight();
-
-		// from editor_window shortcuts
-//		/**
-//		 * Switches the the previous layer.
-//		 */
-//		void doSelectUpperLayer();
-//		/**
-//		 * Switches the the next layer.
-//		 */
-//		void doSelectLowerLayer();
-
-	signals:
 		/**
-		 * Emitted when the user is asked to
-		 * enter the name for the new layer.
+		 * Plays the video if paused.
+		 * Pauses otherwise.
 		 */
-		void userInputTextRequired(const QString &question, QObject *receiver, TextCallback callback);
+		void togglePlayback();
+
+		/**
+		 * Makes a small step to the left.
+		 */
+		void stepLeft();
+		/**
+		 * Makes a small step to the right.
+		 */
+		void stepRight();
+		/**
+		 * Makes a big step to the left.
+		 */
+		void jumpLeft();
+		/**
+		 * Makes a big step to the right.
+		 */
+		void jumpRight();
+
+		/**
+		 * Switches the the previous layer.
+		 */
+		void selectUpperLayer();
+		/**
+		 * Switches the the next layer.
+		 */
+		void selectLowerLayer();
 
 	private:
-		QShortcut *shortcutTogglePlayback;
-		QShortcut *shortcutStepLeft;
-		QShortcut *shortcutStepRight;
-		QShortcut *shortcutJumpLeft;
-		QShortcut *shortcutJumpRight;
-		QShortcut *shortcutAddLayer;
-		QShortcut *shortcutRemoveLayer;
-		QShortcut *shortcutSelectUpperLayer;
-		QShortcut *shortcutSelectLowerLayer;
-		QShortcut *shortcutRecordSegment;
-		QShortcut *shortcutNewLeftBound;
-		QShortcut *shortcutNewRightBound;
-
-		void setupShortcuts();
-		// `do` - it's a callback
-		// for a shortcut
-		void doAddLayer(const QString &name);
-		void doSelectUpperLayer();
-		void doSelectLowerLayer();
-
 		// the loaded project
 		Project *project;
 
@@ -148,10 +112,10 @@ class VideoTab2 : public QWidget
 
 		// update the radio buttons when
 		// layers change somehow
-		void updateLayerAdded(Layer *layer);
+		void layerAdded(Layer *layer);
 		void selectLayerByButton(Layer *layer);
-		void updateLayerRemoved(Layer *layer);
-		void updateCurrentLayerChanged(Layer *newLayer);
+		void layerRemoved(Layer *layer);
+		void currentLayerChanged(Layer *newLayer);
 };
 
 

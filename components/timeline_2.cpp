@@ -93,6 +93,11 @@ Layer *Timeline2::setCurrentLayer(Layer *layer)
 
 void Timeline2::toggleRecord()
 {
+	if (!isEnabled())
+	{
+		return;
+	}
+
 	if (isRecording)
 	{
 		isRecording = false;
@@ -134,9 +139,9 @@ void Timeline2::toggleRecord()
 
 void Timeline2::layerAdded(Layer *layer)
 {
-	connect(layer, &Layer::segmentAdded,     this, &Timeline2::updateSegmentAdded);
-	connect(layer, &Layer::segmentRemoved,   this, &Timeline2::updateSegmentRemoved);
-	connect(layer, &Layer::segmentsModified, this, &Timeline2::updateSegmentsModified);
+	connect(layer, &Layer::segmentAdded,     this, &Timeline2::segmentAdded);
+	connect(layer, &Layer::segmentRemoved,   this, &Timeline2::segmentRemoved);
+	connect(layer, &Layer::segmentsModified, this, &Timeline2::segmentsModified);
 
 	if (isReadyToSaveRecording)
 	{
@@ -147,9 +152,14 @@ void Timeline2::layerAdded(Layer *layer)
 
 void Timeline2::layerRemoved(Layer *layer)
 {
-	disconnect(layer, &Layer::segmentAdded,     this, &Timeline2::updateSegmentAdded);
-	disconnect(layer, &Layer::segmentRemoved,   this, &Timeline2::updateSegmentRemoved);
-	disconnect(layer, &Layer::segmentsModified, this, &Timeline2::updateSegmentsModified);
+	disconnect(layer, &Layer::segmentAdded,     this, &Timeline2::segmentAdded);
+	disconnect(layer, &Layer::segmentRemoved,   this, &Timeline2::segmentRemoved);
+	disconnect(layer, &Layer::segmentsModified, this, &Timeline2::segmentsModified);
+}
+
+void Timeline2::notifyAddLayerCanceled()
+{
+	isReadyToSaveRecording = false;
 }
 
 void Timeline2::paintEvent(QPaintEvent *event)
@@ -301,17 +311,17 @@ void Timeline2::recalculateCurrent(qreal position)
 	setValue(value);
 }
 
-void Timeline2::updateSegmentAdded(const Segment &)
+void Timeline2::segmentAdded(const Segment &)
 {
 	repaint();
 }
 
-void Timeline2::updateSegmentRemoved(Segment)
+void Timeline2::segmentRemoved(Segment)
 {
 	repaint();
 }
 
-void Timeline2::updateSegmentsModified()
+void Timeline2::segmentsModified()
 {
 	repaint();
 }

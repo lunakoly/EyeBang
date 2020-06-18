@@ -21,11 +21,7 @@ class BetterLineEdit : public QLineEdit
 		 * Emitted when the return key is pressed
 		 * and if text is not empty.
 		 */
-		void submit(const QString &text);
-		/**
-		 * Emitted when the escape key is pressed.
-		 */
-		void escape();
+		void submit(bool isCanceled, const QString &text);
 
 	protected:
 		// handles Qt::Key_Return

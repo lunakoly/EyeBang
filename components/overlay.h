@@ -1,5 +1,5 @@
-#ifndef OVERLAYWIDGET_H
-#define OVERLAYWIDGET_H
+#ifndef OVERLAY_H
+#define OVERLAY_H
 
 #include <QWidget>
 #include <QLabel>
@@ -40,7 +40,7 @@ class Overlay : public QWidget
 		BetterLineEdit *textInputPopupText;
 
 		// hides the overlay after askForText
-		void textInputPopupSubmitted(const QString &text);
+		void textInputPopupSubmitted(bool isCanceled, const QString &text);
 
 		// just for configuration.
 		// we will configure each popup
@@ -52,4 +52,4 @@ class Overlay : public QWidget
 };
 
 
-#endif // OVERLAYWIDGET_H
+#endif // OVERLAY_H

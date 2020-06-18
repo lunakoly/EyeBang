@@ -20,6 +20,7 @@ SOURCES += \
     components/layer_select_button.cpp \
     components/overlay.cpp \
     components/panel.cpp \
+    components/placeholder.cpp \
     components/timeline.cpp \
     components/timeline_2.cpp \
     components/video_tab.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
     components/layer_select_button.h \
     components/overlay.h \
     components/panel.h \
+    components/placeholder.h \
     components/timeline.h \
     components/timeline_2.h \
     components/video_tab.h \

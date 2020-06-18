@@ -204,8 +204,10 @@ void Timeline::toggleRecord()
 	repaint();
 }
 
-void Timeline::finishNewLayer(const QString &text)
+void Timeline::finishNewLayer(bool isCanceled, const QString &text)
 {
+	Q_UNUSED(isCanceled);
+
 	auto layer = addLayer(text);
 	layer->addSegment(recordedSegment);
 	qDebug() << "End" << recordedSegment.end;

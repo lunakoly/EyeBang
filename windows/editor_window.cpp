@@ -196,8 +196,10 @@ void EditorWindow::doAddLayer()
 	overlay->askForText("Layer Name", this, (TextCallback) &EditorWindow::doAddLayerOverlayCallback);
 }
 
-void EditorWindow::doAddLayerOverlayCallback(const QString &answer)
+void EditorWindow::doAddLayerOverlayCallback(bool isCanceled, const QString &answer)
 {
+	Q_UNUSED(isCanceled);
+
 	if (!answer.isEmpty())
 	{
 		videoTab->getTimeline()->addLayer(answer);

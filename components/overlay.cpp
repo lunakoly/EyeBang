@@ -71,16 +71,14 @@ void Overlay::askForText(
 	textInputPopupText->setFocus();
 	setHidden(false);
 
-	// esc pressed
-	connect(textInputPopupText, &BetterLineEdit::escape, this, &Overlay::cancel);
-
 	// call user code and hide the overlay
 	connect(textInputPopupText, &BetterLineEdit::submit, this, &Overlay::textInputPopupSubmitted);
 	connect(textInputPopupText, &BetterLineEdit::submit, receiver, callback);
 }
 
-void Overlay::textInputPopupSubmitted(const QString &text)
+void Overlay::textInputPopupSubmitted(bool isCanceled, const QString &text)
 {
 	Q_UNUSED(text);
+	Q_UNUSED(isCanceled);
 	setHidden(true);
 }

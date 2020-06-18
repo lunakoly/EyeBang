@@ -7,6 +7,7 @@
 #include <QStackedLayout>
 
 #include "components/video_tab_2.h"
+#include "components/placeholder.h"
 
 
 /**
@@ -20,13 +21,27 @@ class EditorWindow2 : public OverlayWindow
 		EditorWindow2();
 
 	private:
+		Project *project = nullptr;
+
+		QAction *actionAbout;
 		QAction *actionNewVideoFile;
 		QAction *actionNewYouTube;
 		QAction *actionOpen;
 		QAction *actionSave;
 		QAction *actionLoadRangesFile;
 		QAction *actionExportRangesFile;
-		QAction *actionAbout;
+		QAction *actionTogglePlayback;
+		QAction *actionStepLeft;
+		QAction *actionStepRight;
+		QAction *actionJumpLeft;
+		QAction *actionJumpRight;
+		QAction *actionAddLayer;
+		QAction *actionRemoveLayer;
+		QAction *actionSelectUpperLayer;
+		QAction *actionSelectLowerLayer;
+		QAction *actionRecordSegment;
+		QAction *actionNewLeftBound;
+		QAction *actionNewRightBound;
 
 		void setupActions();
 		// `run` - it's a callback
@@ -38,18 +53,18 @@ class EditorWindow2 : public OverlayWindow
 		void runSave();
 		void runLoadRangesFile();
 		void runExportRangesFile();
+		void runAddLayer();
+		void receiveNewLayerName(bool isCanceled, const QString &name);
+		void runRemoveLayer();
+		void runNewLeftBound();
+		void runNewRightBound();
 
 		QMenuBar *menuBar;
 
 		void setupMenu();
 
+		Placeholder *videoTabPlaceholder;
 		VideoTab2 *videoTab;
-		QStackedLayout *editingTabLayout;
-
-		// accepts userInputTextRequired from
-		// the video tab and passes it to the
-		// overlay
-		void userInputText(const QString &question, QObject *receiver, TextCallback callback);
 };
 
 

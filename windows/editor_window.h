@@ -28,7 +28,7 @@ class EditorWindow : public CustomWindow
 		 * It's used to get the name for the new layer
 		 * when the user presses the shortcut.
 		 */
-		void doAddLayerOverlayCallback(const QString &answer);
+		void doAddLayerOverlayCallback(bool isCanceled, const QString &answer);
 
 	private:
 		QAction *actionNewVideoFile;
