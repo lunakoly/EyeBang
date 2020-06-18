@@ -1,5 +1,5 @@
-#ifndef TIMELINEWIDGET_H
-#define TIMELINEWIDGET_H
+#ifndef TIMELINE2_H
+#define TIMELINE2_H
 
 #include <QWidget>
 
@@ -7,7 +7,7 @@
 #include <QAbstractVideoSurface>
 #include <QHash>
 
-#include "layer.h"
+#include "editing/layer.h"
 #include "overlay.h"
 
 
@@ -16,15 +16,12 @@
  * It incapsulates layer management
  * as well.
  */
-class Timeline : public QWidget
+class Timeline2 : public QWidget
 {
 		Q_OBJECT
 
 	public:
-		// TODO: make proper access
-		Overlay *overlay = nullptr;
-
-		explicit Timeline(QWidget *parent = nullptr);
+		explicit Timeline2(QWidget *parent = nullptr);
 
 		// defines the preferred size
 		// but layouts may ignore it if
@@ -65,28 +62,6 @@ class Timeline : public QWidget
 		void setValue(int value);
 
 		/**
-		 * Instructs the timeline to create
-		 * a new layer with the specified name.
-		 */
-		Layer *addLayer(const QString &name);
-		/**
-		 * Instructs the timeline to remove
-		 * a new layer with the specified name.
-		 * Does nothing if no such a layer found.
-		 */
-		Layer *removeLayer(const QString &name);
-
-		/**
-		 * Returns the layer with the specified
-		 * name or nullptr.
-		 */
-		Layer *getLayer(const QString &name);
-		/**
-		 * Returns the list of all layers.
-		 */
-		QList<Layer *> getLayers();
-
-		/**
 		 * Returns the currently selected layer
 		 * or nullptr.
 		 */
@@ -96,12 +71,7 @@ class Timeline : public QWidget
 		 * name be the current one. Does nothing
 		 * if the layer hasn't been found.
 		 */
-		Layer *setCurrentLayer(const QString &name);
-		/**
-		 * Removes the currently selected layer
-		 * or does nothing if no layer selected.
-		 */
-		Layer *removeCurrentLayer();
+		Layer *setCurrentLayer(Layer *layer);
 
 		/**
 		 * Starts/stops the recording mode.
@@ -111,15 +81,25 @@ class Timeline : public QWidget
 		 * automatically if no one is selected.
 		 */
 		void toggleRecord();
+
 		/**
-		 * If there wasn't a selected layer by the time
-		 * the recording mode finished, the timeline
-		 * prompts the user for a name of the new layer.
-		 * Then this function must be called with this
-		 * layer name as the parameter.
-		 * (So, it's a callback).
+		 * Shouls be bound to the layerAdded
+		 * event of the project.
 		 */
-		void finishNewLayer(bool isCanceled, const QString &text);
+		void layerAdded(Layer *layer);
+		/**
+		 * Should be called then a layer
+		 * is removed from the project.
+		 */
+		void layerRemoved(Layer *layer);
+
+		/**
+		 * Called after the recording requested
+		 * new layer creation to notify
+		 * the timeline that it needs to cancel
+		 * the recording mode and discard the result.
+		 */
+		void notifyAddLayerCanceled();
 
 	signals:
 		/**
@@ -139,19 +119,17 @@ class Timeline : public QWidget
 		void valueChanged(qint64 position);
 
 		/**
-		 * Called when a new layer is created.
-		 */
-		void layerAdded(Layer *layer);
-		/**
-		 * Called a new layer is removed.
-		 */
-		void layerRemoved(Layer *layer);
-		/**
 		 * Called when another layer is selected.
 		 */
 		void currentLayerChanged(Layer *newLayer);
 
-	protected:
+		/**
+		 * Emitted when the user is asked to
+		 * enter the name for the new layer.
+		 */
+		void requestAddNewLayer();
+
+	private:
 		int minimumValue = 0;
 		int maximumValue = 100;
 
@@ -163,6 +141,7 @@ class Timeline : public QWidget
 		// started the recording
 		int recordingStart = 0;
 		int isRecording = false;
+		int isReadyToSaveRecording = false;
 
 		void paintEvent(QPaintEvent *event) override;
 		void mousePressEvent(QMouseEvent *event) override;
@@ -171,7 +150,6 @@ class Timeline : public QWidget
 
 		QHash<QString, Layer*> layers;
 
-	private:
 		// the last recorded segment.
 		// we need to wait until the user
 		// types in the name for the layer
@@ -183,7 +161,12 @@ class Timeline : public QWidget
 		// updates the value based on mouse position
 		// relative to the widget
 		void recalculateCurrent(qreal position);
+
+		// these funcs trigger repaint()
+		void segmentAdded(const Segment &);
+		void segmentRemoved(Segment);
+		void segmentsModified();
 };
 
 
-#endif // TIMELINEWIDGET_H
+#endif // TIMELINE2_H

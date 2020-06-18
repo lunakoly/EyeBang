@@ -3,7 +3,7 @@
 
 #include <QRadioButton>
 
-#include "layer.h"
+#include "editing/layer.h"
 
 
 /**

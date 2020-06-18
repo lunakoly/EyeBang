@@ -12,14 +12,5 @@ class QString;
  */
 using TextCallback = void (QObject::*)(bool, const QString &);
 
-//class Layer;
-
-/**
- * A type of a callback needed for accepting the
- * text answer. The one may need to cast their
- * funtion pointer to this type explicitly.
- */
-//using LayerCallback = void (QObject::*)(Layer *);
-
 
 #endif // ALIASES_H

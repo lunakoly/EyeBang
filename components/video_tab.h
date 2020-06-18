@@ -1,5 +1,5 @@
-#ifndef SUPERVIDEOWIDGET_H
-#define SUPERVIDEOWIDGET_H
+#ifndef VIDEOTAB2_H
+#define VIDEOTAB2_H
 
 #include <QWidget>
 #include <QVideoWidget>
@@ -9,42 +9,35 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 
+#include "aliases.h"
 #include "timeline.h"
 #include "layer_select_button.h"
+#include "editing/project.h"
 
 
 /**
  * Holds the video widget, the timeline
  * and other related things.
  */
-class VideoTab : public QWidget
+class VideoTab2 : public QWidget
 {
 		Q_OBJECT
 
 	public:
-		explicit VideoTab(QWidget *parent = nullptr);
+		explicit VideoTab2(QWidget *parent = nullptr);
 
 		/**
-		 * Loads the video from a file.
+		 * Loads the project and performs
+		 * the required setup.
 		 */
-		void loadFromVideoFile(const QString &filename);
+		void loadProject(Project *project);
 
 		/**
-		 * Returns the timeline. This is needed
-		 * for the user to access the layer functionality
-		 * of the timeline.
-		 * TODO: review required.
+		 * Returns the timeline. This simplifies
+		 * connecting timeline signals and slots.
 		 */
-		Timeline *getTimeline();
+		Timeline2 *getTimeline();
 
-		/**
-		 * Plays the video.
-		 */
-		void play();
-		/**
-		 * Pauses the video.
-		 */
-		void pause();
 		/**
 		 * Plays the video if paused.
 		 * Pauses otherwise.
@@ -68,21 +61,21 @@ class VideoTab : public QWidget
 		 */
 		void jumpRight();
 
-		// from editor_window shortcuts
 		/**
 		 * Switches the the previous layer.
 		 */
-		void doSelectUpperLayer();
+		void selectUpperLayer();
 		/**
 		 * Switches the the next layer.
 		 */
-		void doSelectLowerLayer();
+		void selectLowerLayer();
 
-	protected:
+	private:
+		// the loaded project
+		Project *project;
+
 		QMediaPlayer *mediaPlayer;
-		QVideoWidget *videoWidget;
-		Timeline *timeline;
-
+		Timeline2 *timeline;
 		// for some reason I couldn't get
 		// children of layersList so I started
 		// parenting layer selection buttons to heightProvider
@@ -90,7 +83,6 @@ class VideoTab : public QWidget
 		QWidget *heightProvider;
 		QVBoxLayout *layersList;
 
-	private:
 		QLabel *cursorTimeLabel;
 		QLabel *totalTimeLabel;
 
@@ -109,22 +101,22 @@ class VideoTab : public QWidget
 		// slider == simplified timeline.
 		// but maybe we should change these names
 		// to `timelinePress/Release`
-		void videoSliderPress();
-		void videoSliderRelease();
+		void timelinePressed();
+		void timelineReleased();
 
 		// updates the max of the slider/timeline
 		void mediaPlayerDurationChanged(qint64 duration);
 
 		void mediaPlayerPositionChanged(qint64 position);
-		void videoSliderValueChanged(qint64 position);
+		void timelineValueChanged(qint64 position);
 
 		// update the radio buttons when
 		// layers change somehow
-		void updateLayerAdded(Layer *layer);
+		void layerAdded(Layer *layer);
 		void selectLayerByButton(Layer *layer);
-		void updateLayerRemoved(Layer *layer);
-		void updateCurrentLayerChanged(Layer *newLayer);
+		void layerRemoved(Layer *layer);
+		void currentLayerChanged(Layer *newLayer);
 };
 
 
-#endif // SUPERVIDEOWIDGET_H
+#endif // VIDEOTAB2_H

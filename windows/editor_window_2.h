@@ -6,7 +6,7 @@
 #include <QMenuBar>
 #include <QStackedLayout>
 
-#include "components/video_tab_2.h"
+#include "components/video_tab.h"
 #include "components/placeholder.h"
 
 
