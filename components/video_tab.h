@@ -116,6 +116,7 @@ class VideoTab : public QWidget
 		void selectLayerByButton(Layer *layer);
 		void layerRemoved(Layer *layer);
 		void currentLayerChanged(Layer *newLayer);
+		void layerRenamed(const QString &oldName, const QString &newName);
 };
 
 

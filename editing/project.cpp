@@ -61,3 +61,15 @@ bool Project::hasLayers()
 {
 	return !layers.isEmpty();
 }
+
+void Project::rename(const QString &currentName, const QString &newName)
+{
+	if (layers.contains(currentName))
+	{
+		auto layer = layers[currentName];
+		layers.remove(currentName);
+		layers[newName] = layer;
+		layer->setName(newName);
+		emit layerRenamed(currentName, newName);
+	}
+}

@@ -124,6 +124,7 @@ void VideoTab::loadProject(Project *project)
 
 	connect(project, &Project::layerAdded,   this, &VideoTab::layerAdded);
 	connect(project, &Project::layerRemoved, this, &VideoTab::layerRemoved);
+	connect(project, &Project::layerRenamed, this, &VideoTab::layerRenamed);
 
 	connect(project, &Project::layerAdded,   timeline, &Timeline::layerAdded);
 	connect(project, &Project::layerRemoved, timeline, &Timeline::layerRemoved);
@@ -363,6 +364,26 @@ void VideoTab::currentLayerChanged(Layer *newLayer)
 		if (it < buttons.size())
 		{
 			buttons[it]->setChecked(true);
+		}
+	}
+}
+
+void VideoTab::layerRenamed(const QString &, const QString &newName)
+{
+	QList<LayerSelectButton *> buttons = heightProvider->findChildren<LayerSelectButton *>();
+
+	if (!buttons.isEmpty())
+	{
+		int it = 0;
+
+		while (it < buttons.size() && buttons[it]->layer->getName() != newName)
+		{
+			it += 1;
+		}
+
+		if (it < buttons.size())
+		{
+			buttons[it]->setText(newName);
 		}
 	}
 }

@@ -60,6 +60,16 @@ class Project : public QObject
 		 */
 		bool hasLayers();
 
+		/**
+		 * Rename the layer with the `currentName`
+		 * to `newName`. Does nothing if no such
+		 * a layer found.
+		 * Note that this function
+		 * must be used instead of Layer::setName()
+		 * for layers controlled by this project.
+		 */
+		void rename(const QString &currentName, const QString &newName);
+
 	signals:
 		/**
 		 * Emitted when the project video
@@ -76,6 +86,12 @@ class Project : public QObject
 		 * Called a new layer is removed.
 		 */
 		void layerRemoved(Layer *layer);
+
+		/**
+		 * Emitted whenever the name of a layer
+		 * controlled by this project changes.
+		 */
+		void layerRenamed(const QString &oldName, const QString &newName);
 
 	private:
 		QString videoFile;

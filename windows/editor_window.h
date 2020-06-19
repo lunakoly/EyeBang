@@ -37,6 +37,7 @@ class EditorWindow : public OverlayWindow
 		QAction *actionJumpRight;
 		QAction *actionAddLayer;
 		QAction *actionRemoveLayer;
+		QAction *actionRenameLayer;
 		QAction *actionSelectUpperLayer;
 		QAction *actionSelectLowerLayer;
 		QAction *actionRecordSegment;
@@ -54,8 +55,10 @@ class EditorWindow : public OverlayWindow
 		void runLoadRangesFile();
 		void runExportRangesFile();
 		void runAddLayer();
-		void receiveNewLayerName(bool isCanceled, const QString &name);
+		void receiveAddLayerName(bool isCanceled, const QString &name);
 		void runRemoveLayer();
+		void runRenameLayer();
+		void receiveRenameLayer(bool isCanceled, const QString &newName);
 		void runNewLeftBound();
 		void runNewRightBound();
 

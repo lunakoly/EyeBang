@@ -2,7 +2,7 @@
 
 
 LayerSelectButton::LayerSelectButton(Layer *layer, QWidget *parent)
-	: QRadioButton(layer->name, parent)
+	: QRadioButton(layer->getName(), parent)
 	, layer(layer)
 {
 	connect(this, &LayerSelectButton::toggled, this, &LayerSelectButton::triggerChecked);

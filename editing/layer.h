@@ -14,13 +14,20 @@ class Layer : public QObject
 		Q_OBJECT
 
 	public:
+		explicit Layer(const QString &name, QObject *parent = nullptr);
+
 		/**
-		 * The unique name of the layer
+		 * Returns the layer unique name.
 		 * (it used to be called a `marker` in the past).
 		 */
-		const QString name;
-
-		explicit Layer(const QString &name, QObject *parent = nullptr);
+		QString getName();
+		/**
+		 * Sets the new name for this layer.
+		 * Don't use this function for changing the
+		 * name of the layer if it's controlled by
+		 * a Project instance - use the Project::rename().
+		 */
+		void setName(const QString &name);
 
 		/**
 		 * Returns a read-only vector of the
@@ -56,6 +63,11 @@ class Layer : public QObject
 
 	signals:
 		/**
+		 * Emitted whenever the name of the layer
+		 * changes.
+		 */
+		void nameChanged(const QString &oldName, const QString &newName);
+		/**
 		 * Emitted when a new segment is added
 		 * (the segment passed as the parameter may
 		 * be not the same one that was requested to
@@ -73,6 +85,7 @@ class Layer : public QObject
 		void segmentsModified();
 
 	private:
+		QString name;
 		QVector<Segment> segments;
 };
 

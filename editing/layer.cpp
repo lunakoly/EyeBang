@@ -8,6 +8,18 @@ Layer::Layer(const QString &name, QObject *parent)
 
 }
 
+QString Layer::getName()
+{
+	return name;
+}
+
+void Layer::setName(const QString &name)
+{
+	auto oldName = this->name;
+	this->name = name;
+	emit nameChanged(oldName, name);
+}
+
 const QVector<Segment> Layer::getSegments() const
 {
 	return segments;

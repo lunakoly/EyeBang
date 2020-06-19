@@ -81,12 +81,15 @@ void EditorWindow::setupActions()
 
 	actionAddLayer    = new QAction(tr("Add Layer"),    this);
 	actionRemoveLayer = new QAction(tr("Remove Layer"), this);
+	actionRenameLayer = new QAction(tr("Rename Layer"), this);
 
 	actionAddLayer   ->setShortcut(QKeySequence(Qt::Key_L));
-	actionRemoveLayer->setShortcut(QKeySequence(Qt::Key_R));
+	actionRemoveLayer->setShortcut(QKeySequence(Qt::Key_X));
+	actionRenameLayer->setShortcut(QKeySequence(Qt::Key_R));
 
 	connect(actionAddLayer,    &QAction::triggered, this, &EditorWindow::runAddLayer);
 	connect(actionRemoveLayer, &QAction::triggered, this, &EditorWindow::runRemoveLayer);
+	connect(actionRenameLayer, &QAction::triggered, this, &EditorWindow::runRenameLayer);
 
 	actionSelectUpperLayer = new QAction(tr("Select Upper Layer"), this);
 	actionSelectLowerLayer = new QAction(tr("Select Lower Layer"), this);
@@ -137,6 +140,7 @@ void EditorWindow::setupMenu()
 		editMenu->addSeparator();
 		editMenu->addAction(actionAddLayer);
 		editMenu->addAction(actionRemoveLayer);
+		editMenu->addAction(actionRenameLayer);
 		editMenu->addSeparator();
 		editMenu->addAction(actionSelectUpperLayer);
 		editMenu->addAction(actionSelectLowerLayer);
@@ -205,11 +209,11 @@ void EditorWindow::runAddLayer()
 {
 	if (project != nullptr)
 	{
-		overlay->askForText("New Layer Name", this, (TextCallback) &EditorWindow::receiveNewLayerName);
+		overlay->askForText("New Layer Name", this, (TextCallback) &EditorWindow::receiveAddLayerName);
 	}
 }
 
-void EditorWindow::receiveNewLayerName(bool isCanceled, const QString &name)
+void EditorWindow::receiveAddLayerName(bool isCanceled, const QString &name)
 {
 	if (isCanceled)
 	{
@@ -225,7 +229,29 @@ void EditorWindow::runRemoveLayer()
 {
 	if (project != nullptr)
 	{
-		project->removeLayer(videoTab->getTimeline()->getCurrentLayer()->name);
+		project->removeLayer(videoTab->getTimeline()->getCurrentLayer()->getName());
+	}
+}
+
+QString oldNameToReplace("");
+
+void EditorWindow::runRenameLayer()
+{
+	if (project != nullptr)
+	{
+		auto currentName = videoTab->getTimeline()->getCurrentLayer()->getName();
+		QString message = tr("Rename `") + currentName + tr("` to");
+		oldNameToReplace = currentName;
+
+		overlay->askForText(message, this, (TextCallback) &EditorWindow::receiveRenameLayer);
+	}
+}
+
+void EditorWindow::receiveRenameLayer(bool isCanceled, const QString &name)
+{
+	if (project != nullptr && !isCanceled)
+	{
+		project->rename(oldNameToReplace, name);
 	}
 }
 
