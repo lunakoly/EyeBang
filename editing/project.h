@@ -70,6 +70,12 @@ class Project : public QObject
 		 */
 		void rename(const QString &currentName, const QString &newName);
 
+		/**
+		 * Returns true if the specified layer
+		 * has been created.
+		 */
+		bool containsLayer(const QString &name);
+
 	signals:
 		/**
 		 * Emitted when the project video

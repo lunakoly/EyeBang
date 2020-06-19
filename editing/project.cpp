@@ -1,5 +1,9 @@
 #include "project.h"
 
+#include <QMessageBox>
+
+
+
 Project::Project(QObject *parent) : QObject(parent)
 {
 
@@ -66,10 +70,22 @@ void Project::rename(const QString &currentName, const QString &newName)
 {
 	if (layers.contains(currentName))
 	{
-		auto layer = layers[currentName];
-		layers.remove(currentName);
-		layers[newName] = layer;
-		layer->setName(newName);
-		emit layerRenamed(currentName, newName);
+		if (!layers.contains(newName))
+		{
+			auto layer = layers[currentName];
+			layers.remove(currentName);
+			layers[newName] = layer;
+			layer->setName(newName);
+			emit layerRenamed(currentName, newName);
+		}
+		else
+		{
+			QMessageBox::warning(nullptr, tr("Note"), tr("There's already a layer with such a name"));
+		}
 	}
+}
+
+bool Project::containsLayer(const QString &name)
+{
+	return layers.contains(name);
 }

@@ -221,7 +221,14 @@ void EditorWindow::receiveAddLayerName(bool isCanceled, const QString &name)
 	}
 	else if (project != nullptr)
 	{
-		project->addLayer(name);
+		if (project->containsLayer(name))
+		{
+			QMessageBox::warning(this, tr("Note"), tr("There's already a layer with such a name!"));
+		}
+		else
+		{
+			project->addLayer(name);
+		}
 	}
 }
 
