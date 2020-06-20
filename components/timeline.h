@@ -62,6 +62,20 @@ class Timeline : public QWidget
 		void setValue(int value);
 
 		/**
+		 * Returns the current zoom value.
+		 */
+		qreal getZoom();
+		/**
+		 * Updates the zoom value.
+		 */
+		void setZoom(qreal value);
+		/**
+		 * Makes the current track appear
+		 * in the center with the proper zoom.
+		 */
+		void centerContent();
+
+		/**
 		 * Returns the currently selected layer
 		 * or nullptr.
 		 */
@@ -117,6 +131,10 @@ class Timeline : public QWidget
 		 * in the usual QSlider.
 		 */
 		void valueChanged(qint64 position);
+		/**
+		 * Emitted when the zoom is changed.
+		 */
+		void zoomed();
 
 		/**
 		 * Called when another layer is selected.
@@ -132,8 +150,31 @@ class Timeline : public QWidget
 	private:
 		int minimumValue = 0;
 		int maximumValue = 100;
-
 		int currentValue = 0;
+
+		qreal zoom = 0;
+		qreal scroll = 0;
+
+		// returns the width of
+		// the visible to the user
+		// part of the track.
+		qreal getVisibleZone();
+		// alias for getVisibleZone() / rect().width
+		qreal getVisibleRatio();
+		// from virtual track space
+		// to position relative to the
+		// widget
+		int valueToPosition(int value);
+		// can be used by mousePressed
+		// event to determine the proper
+		// value for the mouse position
+		int positionToValue(int position);
+
+		// true when mid mouse click
+		bool isScrolling = false;
+
+		// handle zoom
+		void wheelEvent(QWheelEvent *event) override;
 
 		Layer *currentLayer = nullptr;
 

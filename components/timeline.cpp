@@ -6,6 +6,13 @@
 #include <QPainterPath>
 
 
+#define INDENT 4
+#define TOP_ZONE 15
+#define MINIMUM_ZONE 1000
+#define CURSOR_WIDTH 2
+#define ROUNDING 5
+
+
 Timeline::Timeline(QWidget *parent) : QWidget(parent)
 {
 
@@ -70,6 +77,41 @@ void Timeline::setValue(int value)
 		repaint();
 		emit valueChanged(currentValue);
 	}
+}
+
+qreal Timeline::getZoom()
+{
+	return zoom;
+}
+
+void Timeline::setZoom(qreal value)
+{
+	// remember where the center was
+	int centerValue = positionToValue(0) + getVisibleZone() / 2;
+	// extra space here is just for fun
+	int maxZoom = (maximumValue - minimumValue) / MINIMUM_ZONE * 1.5;
+
+	zoom = value;
+
+	if (zoom < 0)
+	{
+		zoom = 0;
+	}
+	else if (zoom > maxZoom)
+	{
+		zoom = maxZoom;
+	}
+
+	// make the center be in the center
+	scroll = centerValue - getVisibleZone() / 2;
+	emit zoomed();
+	repaint();
+}
+
+void Timeline::centerContent()
+{
+	scroll = (maximumValue - minimumValue) / 2 - getVisibleZone() / 2;
+	setZoom((maximumValue - minimumValue) / MINIMUM_ZONE * 1.05);
 }
 
 Layer *Timeline::getCurrentLayer()
@@ -162,48 +204,84 @@ void Timeline::notifyAddLayerCanceled()
 	isReadyToSaveRecording = false;
 }
 
+qreal Timeline::getVisibleZone()
+{
+	return MINIMUM_ZONE * (1 + zoom);
+}
+
+qreal Timeline::getVisibleRatio()
+{
+	return getVisibleZone() / rect().width();
+}
+
+int Timeline::valueToPosition(int value)
+{
+	return round((value - scroll) / getVisibleRatio());
+}
+
+int Timeline::positionToValue(int position)
+{
+	return round((qreal) position * getVisibleRatio() + scroll);
+}
+
+void Timeline::wheelEvent(QWheelEvent *event)
+{
+	if (isEnabled())
+	{
+		QPoint pixelsDelta = event->pixelDelta();
+		QPoint degreesDelta = event->angleDelta() / 8;
+
+		if (!pixelsDelta.isNull())
+		{
+			setZoom(zoom - pixelsDelta.y());
+		}
+		else if (!degreesDelta.isNull())
+		{
+			setZoom(zoom - degreesDelta.y() / 15);
+		}
+	}
+}
+
 void Timeline::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
-
-	int cursorWidth = 2;
-	int paddingTop = 15;
-	int paddingSides = 4;
-	int rounding = 5;
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.save();
 
 	// background
-	painter.setBrush(QColor("#383838"));
-	painter.setPen(Qt::NoPen);
-	painter.drawRoundedRect(0, paddingTop, rect().width(), rect().height() - paddingTop, rounding, rounding);
-	painter.drawRect(0, paddingTop, rect().width(), rounding);
-
 	painter.setBrush(QColor("#424242"));
 	painter.setPen(Qt::NoPen);
-	painter.drawRoundedRect(0, 0, rect().width(), paddingTop, rounding, rounding);
-	painter.drawRect(0, paddingTop - rounding, rect().width(), rounding);
+	painter.drawRoundedRect(0, 0, rect().width(), TOP_ZONE, ROUNDING, ROUNDING);
+	painter.drawRect(0, TOP_ZONE - ROUNDING, rect().width(), ROUNDING);
 
 	// background strips
-	int current = paddingSides;
-	int total = rect().width() - paddingSides * 2;
-	int step = total / 80;
-
-	// to prevent an infinite loop
-	if (step == 0)
-	{
-		step = 10;
-	}
+	int current = ROUNDING;
+	int total = (rect().width() - ROUNDING * 2) / 4 + 1;
+	int shift = (int) round(scroll / getVisibleRatio()) % 4;
 
 	painter.setPen(QPen(QColor("#666"), 1));
+//	painter.setPen(QPen(QColor("#353535"), 1));
 
-	while (current < paddingSides + total)
+	for (int it = 0; it < total; it++)
 	{
-		painter.drawLine(current, 0, current, paddingTop);
-		current += step;
+		painter.drawLine(current - shift, 0, current - shift, TOP_ZONE);
+		current += 4;
 	}
+
+	painter.setBrush(QColor("#383838"));
+	painter.setPen(Qt::NoPen);
+	painter.drawRoundedRect(0, TOP_ZONE, rect().width(), rect().height() - TOP_ZONE, ROUNDING, ROUNDING);
+	painter.drawRect(0, TOP_ZONE, rect().width(), ROUNDING);
+
+	// the whole video track
+	painter.setPen(Qt::NoPen);
+	painter.setBrush(QColor("#2c2c2c"));
+
+	int beginPosition = valueToPosition(0);
+	int   endPosition = valueToPosition(maximumValue);
+	painter.drawRect(beginPosition, TOP_ZONE + 10, endPosition - beginPosition, rect().height() - TOP_ZONE - 20);
 
 	// layers
 	if (currentLayer != nullptr)
@@ -213,76 +291,108 @@ void Timeline::paintEvent(QPaintEvent *event)
 
 		for (auto &it : currentLayer->getSegments())
 		{
-			qreal beginState = (double) (it.begin - minimumValue) / (maximumValue - minimumValue);
-			qreal   endState = (double) (it.end   - minimumValue) / (maximumValue - minimumValue);
-
-			int beginPosition = qRound(beginState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
-			int   endPosition = qRound(  endState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
-
-			painter.drawRect(beginPosition, paddingTop + 10, endPosition - beginPosition, rect().height() - paddingTop - 20);
+			int beginPosition = valueToPosition(it.begin);
+			int   endPosition = valueToPosition(it.end);
+			painter.drawRect(beginPosition, TOP_ZONE + 10, endPosition - beginPosition, rect().height() - TOP_ZONE - 20);
 		}
 	}
 
 	// recording segment
 	if (isRecording)
 	{
-		qreal        currentState = (double) (currentValue   - minimumValue) / (maximumValue - minimumValue);
-		qreal recordingStartState = (double) (recordingStart - minimumValue) / (maximumValue - minimumValue);
-
-		int        currentPosition = qRound(       currentState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
-		int recordingStartPosition = qRound(recordingStartState * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
+		int        currentPosition = valueToPosition(currentValue);
+		int recordingStartPosition = valueToPosition(recordingStart);
 
 		painter.setPen(QPen(QColor(255, 253, 255), 2));
 		painter.setBrush(QColor(255, 255, 255, 200));
 
 		if (currentPosition < recordingStartPosition)
 		{
-			painter.drawRect(currentPosition, paddingTop + 5, recordingStartPosition - currentPosition, rect().height() - paddingTop - 10);
+			painter.drawRect(currentPosition, TOP_ZONE + 5, recordingStartPosition - currentPosition, rect().height() - TOP_ZONE - 10);
 		}
 		else
 		{
-			painter.drawRect(recordingStartPosition, paddingTop + 5, currentPosition - recordingStartPosition, rect().height() - paddingTop - 10);
+			painter.drawRect(recordingStartPosition, TOP_ZONE + 5, currentPosition - recordingStartPosition, rect().height() - TOP_ZONE - 10);
 		}
 
 		painter.setPen(QPen(QColor("#aaaaaa"), 1));
-		painter.drawLine(recordingStartPosition, paddingTop, recordingStartPosition, rect().height());
-
+		painter.drawLine(recordingStartPosition, TOP_ZONE, recordingStartPosition, rect().height());
 	}
 
 	// red cursor
 	if (isEnabled())
 	{
 		// cursor vertical line
-		qreal state = (double) (currentValue - minimumValue) / (maximumValue - minimumValue);
-		int position = qRound(state * (rect().width() - cursorWidth - 2 * paddingSides)) + cursorWidth / 2 + paddingSides;
+		int position = valueToPosition(currentValue);
 
-		painter.setPen(QPen(Qt::red, cursorWidth));
-		painter.drawLine(position, rect().height(), position, paddingTop);
+		if (position < -2)
+		{
+			// left arrow
+			QPainterPath cursorTop;
+			cursorTop.moveTo(0, 7);
+			cursorTop.lineTo(8, 4);
+			cursorTop.lineTo(8, 11);
+			cursorTop.closeSubpath();
 
-		// cursor top triangle
-		QPainterPath cursorTop;
-		cursorTop.moveTo(position, paddingTop);
-		cursorTop.lineTo(position - 3, 0);
-		cursorTop.lineTo(position + 3, 0);
-		cursorTop.closeSubpath();
+			painter.setPen(QPen(QColor("#ff2222"), 1));
+			painter.setBrush(Qt::red);
+			painter.drawPath(cursorTop);
+		}
+		else if (position > rect().width() + 2)
+		{
+			// left arrow
+			QPainterPath cursorTop;
+			cursorTop.moveTo(rect().width() - 1, 7);
+			cursorTop.lineTo(rect().width() - 9, 4);
+			cursorTop.lineTo(rect().width() - 9, 11);
+			cursorTop.closeSubpath();
 
-		painter.setPen(QPen(QColor("#ff2222"), 1));
-		painter.setBrush(Qt::red);
-		painter.drawPath(cursorTop);
+			painter.setPen(QPen(QColor("#ff2222"), 1));
+			painter.setBrush(Qt::red);
+			painter.drawPath(cursorTop);
+		}
+		else
+		{
+			// cursor top triangle
+			painter.setPen(QPen(Qt::red, CURSOR_WIDTH));
+			painter.drawLine(position, rect().height(), position, TOP_ZONE);
+
+			QPainterPath cursorTop;
+			cursorTop.moveTo(position, TOP_ZONE);
+			cursorTop.lineTo(position - 3, 0);
+			cursorTop.lineTo(position + 3, 0);
+			cursorTop.closeSubpath();
+
+			painter.setPen(QPen(QColor("#ff2222"), 1));
+			painter.setBrush(Qt::red);
+			painter.drawPath(cursorTop);
+		}
 	}
 
 	painter.restore();
 }
 
+// initial position
+// for scrolling
+int oldPosition;
+qreal oldScroll;
+
 void Timeline::mousePressEvent(QMouseEvent *event)
 {
-	Q_UNUSED(event);
-
 	if (isEnabled())
 	{
-		emit sliderPressed();
-		QPointF position = event->localPos();
-		recalculateCurrent(position.x());
+		if (event->buttons() == Qt::LeftButton)
+		{
+			emit sliderPressed();
+			QPointF position = event->localPos();
+			setValue(positionToValue(position.x()));
+		}
+		else if (event->button() == Qt::MidButton)
+		{
+			isScrolling = true;
+			oldPosition = event->pos().x();
+			oldScroll = scroll;
+		}
 	}
 }
 
@@ -294,14 +404,24 @@ void Timeline::mouseReleaseEvent(QMouseEvent *event)
 	{
 		emit sliderReleased();
 	}
+
+	isScrolling = false;
 }
 
 void Timeline::mouseMoveEvent(QMouseEvent *event)
 {
 	if (isEnabled())
 	{
-		QPointF position = event->localPos();
-		recalculateCurrent(position.x());
+		if (isScrolling)
+		{
+			scroll = oldScroll - (event->pos().x() - oldPosition) * getVisibleRatio();
+			repaint();
+		}
+		else
+		{
+			QPointF position = event->localPos();
+			setValue(positionToValue(position.x()));
+		}
 	}
 }
 

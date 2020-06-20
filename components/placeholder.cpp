@@ -13,6 +13,7 @@ Placeholder::Placeholder(const QString &message, QWidget *parent) : QStackedWidg
 	placeholderLayout->setAlignment(Qt::AlignCenter);
 
 	QLabel *placeholderMessage = new QLabel(message, this);
+	placeholderMessage->setStyleSheet("font-size: 25px;");
 	placeholderLayout->addWidget(placeholderMessage);
 
 	setCurrentIndex(0);

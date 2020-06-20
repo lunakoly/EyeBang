@@ -139,6 +139,7 @@ void VideoTab::loadProject(Project *project)
 void VideoTab::mediaPlayerDurationChanged(qint64 duration)
 {
 	timeline->setMaximum(duration);
+	timeline->centerContent();
 	totalTimeLabel->setText(tr("Total: ") + timeToString(duration));
 
 	// start rendering the current frame instead

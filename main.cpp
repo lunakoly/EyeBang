@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
 	// menuBar = new QMenuBar(this);
 	// menuBar->setStyle(platformStyle);
 
-	EditorWindow window2;
-	window2.show();
+	EditorWindow window;
+	window.show();
 
 	return application.exec();
 }
