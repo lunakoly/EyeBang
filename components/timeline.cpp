@@ -372,11 +372,6 @@ void Timeline::paintEvent(QPaintEvent *event)
 	painter.restore();
 }
 
-// initial position
-// for scrolling
-int oldPosition;
-qreal oldScroll;
-
 void Timeline::mousePressEvent(QMouseEvent *event)
 {
 	if (isEnabled())

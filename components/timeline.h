@@ -172,6 +172,10 @@ class Timeline : public QWidget
 
 		// true when mid mouse click
 		bool isScrolling = false;
+		// initial position
+		// for scrolling
+		int oldPosition;
+		qreal oldScroll;
 
 		// handle zoom
 		void wheelEvent(QWheelEvent *event) override;

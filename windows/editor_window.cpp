@@ -265,8 +265,6 @@ void EditorWindow::runRemoveLayer()
 	}
 }
 
-QString oldNameToReplace("");
-
 void EditorWindow::runRenameLayer()
 {
 	if (project != nullptr)

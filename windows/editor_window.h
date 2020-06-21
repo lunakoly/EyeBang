@@ -57,8 +57,11 @@ class EditorWindow : public OverlayWindow
 		void runAddLayer();
 		void receiveAddLayerName(bool isCanceled, const QString &name);
 		void runRemoveLayer();
+
+		QString oldNameToReplace;
 		void runRenameLayer();
 		void receiveRenameLayer(bool isCanceled, const QString &newName);
+
 		void runNewLeftBound();
 		void runNewRightBound();
 
