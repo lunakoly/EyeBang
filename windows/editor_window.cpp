@@ -49,7 +49,7 @@ void EditorWindow::setupActions()
 	actionOpen->setShortcut(QKeySequence(Qt::Key_O));
 	actionSave->setShortcut(QKeySequence(Qt::Key_S));
 
-	connect(actionOpen, &QAction::triggered, this, &EditorWindow::runNewVideoFile);
+	connect(actionOpen, &QAction::triggered, this, &EditorWindow::runOpen);
 	connect(actionSave, &QAction::triggered, this, &EditorWindow::runSave);
 
 	actionLoadRangesFile   = new QAction(tr("Load Ranges File"),   this);
@@ -114,6 +114,15 @@ void EditorWindow::setupActions()
 
 	connect(actionNewLeftBound,  &QAction::triggered, this, &EditorWindow::runNewLeftBound);
 	connect(actionNewRightBound, &QAction::triggered, this, &EditorWindow::runNewRightBound);
+
+	actionStepScrollLeft  = new QAction(tr("Step-Scroll Left"), this);
+	actionStepScrollRight = new QAction(tr("Step-Scroll Right"), this);
+
+	actionStepScrollLeft ->setShortcut(QKeySequence(Qt::Key_Left));
+	actionStepScrollRight->setShortcut(QKeySequence(Qt::Key_Right));
+
+	connect(actionStepScrollLeft,  &QAction::triggered, videoTab->getTimeline(), &Timeline::stepScrollLeft);
+	connect(actionStepScrollRight, &QAction::triggered, videoTab->getTimeline(), &Timeline::stepScrollRight);
 }
 
 void EditorWindow::setupMenu()
@@ -132,6 +141,8 @@ void EditorWindow::setupMenu()
 	QMenu *editMenu = menuBar->addMenu(tr("Edit"));
 		editMenu->addAction(actionTogglePlayback);
 		editMenu->addAction(actionRecordSegment);
+		editMenu->addAction(actionStepScrollLeft);
+		editMenu->addAction(actionStepScrollRight);
 		editMenu->addSeparator();
 		editMenu->addAction(actionStepLeft);
 		editMenu->addAction(actionStepRight);

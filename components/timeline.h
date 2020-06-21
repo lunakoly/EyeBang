@@ -97,6 +97,15 @@ class Timeline : public QWidget
 		void toggleRecord();
 
 		/**
+		 * Scrolls to the left a little bit.
+		 */
+		void stepScrollLeft();
+		/**
+		 * Scrolls to the right a little bit.
+		 */
+		void stepScrollRight();
+
+		/**
 		 * Shouls be bound to the layerAdded
 		 * event of the project.
 		 */
@@ -202,10 +211,6 @@ class Timeline : public QWidget
 		// to that layer, but up until then
 		// we must store it somewhere
 		Segment recordedSegment{0,0};
-
-		// updates the value based on mouse position
-		// relative to the widget
-		void recalculateCurrent(qreal position);
 
 		// these funcs trigger repaint()
 		void segmentAdded(const Segment &);

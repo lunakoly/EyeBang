@@ -12,6 +12,8 @@
 #define CURSOR_WIDTH 2
 #define ROUNDING 5
 
+#define SCROLL_STEP 100
+
 
 Timeline::Timeline(QWidget *parent) : QWidget(parent)
 {
@@ -177,6 +179,18 @@ void Timeline::toggleRecord()
 	// although, we may say here:
 	// isRecording = !isRecording;
 	// repaint();
+}
+
+void Timeline::stepScrollLeft()
+{
+	scroll -= SCROLL_STEP * getVisibleRatio();
+	repaint();
+}
+
+void Timeline::stepScrollRight()
+{
+	scroll += SCROLL_STEP * getVisibleRatio();
+	repaint();
 }
 
 void Timeline::layerAdded(Layer *layer)
@@ -418,12 +432,6 @@ void Timeline::mouseMoveEvent(QMouseEvent *event)
 			setValue(positionToValue(position.x()));
 		}
 	}
-}
-
-void Timeline::recalculateCurrent(qreal position)
-{
-	int value = qRound((double) position / width() * (maximumValue - minimumValue)) + minimumValue;
-	setValue(value);
 }
 
 void Timeline::segmentAdded(const Segment &)

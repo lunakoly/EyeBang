@@ -43,6 +43,8 @@ class EditorWindow : public OverlayWindow
 		QAction *actionRecordSegment;
 		QAction *actionNewLeftBound;
 		QAction *actionNewRightBound;
+		QAction *actionStepScrollLeft;
+		QAction *actionStepScrollRight;
 
 		void setupActions();
 		// `run` - it's a callback
