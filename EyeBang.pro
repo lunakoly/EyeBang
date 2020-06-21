@@ -52,7 +52,10 @@ FORMS +=
 TRANSLATIONS += \
     EyeBang_ru_RU.ts
 
+# Windows icon
 RC_ICONS = assets/icon.ico
+# macOS icon
+ICON = assets/icon.icns
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
