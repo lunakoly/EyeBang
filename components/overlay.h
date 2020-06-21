@@ -27,7 +27,12 @@ class Overlay : public QWidget
 		 * Shows overlay and prompts for a line of text.
 		 * Suitable for prompting a name for something.
 		 */
-		void askForText(const QString &question, const QObject *receiver, TextCallback callback);
+		void askForText(
+			const QString &question,
+			const QObject *receiver,
+			TextCallback callback,
+			QString defaultText = ""
+		);
 
 	protected:
 		// dark transparent background is drawn here

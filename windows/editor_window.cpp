@@ -273,7 +273,7 @@ void EditorWindow::runRenameLayer()
 		QString message = tr("Rename `") + currentName + tr("` to");
 		oldNameToReplace = currentName;
 
-		overlay->askForText(message, this, (TextCallback) &EditorWindow::receiveRenameLayer);
+		overlay->askForText(message, this, (TextCallback) &EditorWindow::receiveRenameLayer, currentName);
 	}
 }
 
