@@ -1,7 +1,8 @@
 #include "project.h"
 
 #include <QMessageBox>
-
+#include <QTextStream>
+#include <QDateTime>
 
 
 Project::Project(QObject *parent) : QObject(parent)
@@ -88,4 +89,24 @@ void Project::rename(const QString &currentName, const QString &newName)
 bool Project::containsLayer(const QString &name)
 {
 	return layers.contains(name);
+}
+
+QString timeToString(int time)
+{
+	return QDateTime::fromMSecsSinceEpoch(time).toUTC().toString("h:mm:ss.zzz");
+}
+
+void Project::exportRangesFile(QFile &file)
+{
+	QTextStream output(&file);
+
+	for (auto &layer : layers)
+	{
+		for (auto &segment : layer->getSegments())
+		{
+			output << timeToString(segment.begin) + '-' + timeToString(segment.end) + ' ' + layer->getName() + '\n';
+		}
+
+		output << '\n';
+	}
 }

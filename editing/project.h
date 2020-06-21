@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QFile>
 
 #include "layer.h"
 
@@ -75,6 +76,13 @@ class Project : public QObject
 		 * has been created.
 		 */
 		bool containsLayer(const QString &name);
+
+		/**
+		 * Exports the contents to the leacy
+		 * Ranges File (*.rng) for the legacy ranger
+		 * CLI utility.
+		 */
+		void exportRangesFile(QFile &file);
 
 	signals:
 		/**

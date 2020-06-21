@@ -202,7 +202,32 @@ void EditorWindow::runLoadRangesFile()
 
 void EditorWindow::runExportRangesFile()
 {
-	QMessageBox::critical(this, tr("TODO"), tr("The feature hasn't been implemented."));
+	QString filename = QFileDialog::getSaveFileName(
+		this,
+		tr("Export Ranges File"),
+		"",
+		tr("Ranges File (*.rng);;All Files (*)")
+	);
+
+	if (filename.isNull())
+	{
+		return;
+	}
+
+	QFile file(filename);
+
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Can't open file: ") + file.errorString());
+		return;
+	}
+
+	if (project != nullptr)
+	{
+		project->exportRangesFile(file);
+	}
+
+	file.close();
 }
 
 void EditorWindow::runAddLayer()
