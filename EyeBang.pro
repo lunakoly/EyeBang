@@ -21,10 +21,12 @@ SOURCES += \
     components/overlay.cpp \
     components/panel.cpp \
     components/placeholder.cpp \
+    components/settings_tab.cpp \
     components/timeline.cpp \
     components/video_tab.cpp \
     editing/layer.cpp \
     editing/project.cpp \
+    editing/settings.cpp \
     main.cpp \
     windows/custom_window.cpp \
     windows/editor_window.cpp \
@@ -37,11 +39,13 @@ HEADERS += \
     components/overlay.h \
     components/panel.h \
     components/placeholder.h \
+    components/settings_tab.h \
     components/timeline.h \
     components/video_tab.h \
     editing/layer.h \
     editing/project.h \
     editing/segment.h \
+    editing/settings.h \
     help.h \
     windows/custom_window.h \
     windows/editor_window.h \

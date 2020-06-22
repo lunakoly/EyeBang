@@ -5,9 +5,12 @@
 
 #include <QMenuBar>
 #include <QStackedLayout>
+#include <QTemporaryFile>
 
 #include "components/video_tab.h"
 #include "components/placeholder.h"
+#include "editing/settings.h"
+#include "components/settings_tab.h"
 
 
 /**
@@ -22,6 +25,7 @@ class EditorWindow : public OverlayWindow
 
 	private:
 		Project *project = nullptr;
+		Settings settings;
 
 		QAction *actionAbout;
 		QAction *actionNewVideoFile;
@@ -45,6 +49,7 @@ class EditorWindow : public OverlayWindow
 		QAction *actionNewRightBound;
 		QAction *actionStepScrollLeft;
 		QAction *actionStepScrollRight;
+		QAction *actionRenderLegacy;
 
 		void setupActions();
 		// `run` - it's a callback
@@ -60,6 +65,9 @@ class EditorWindow : public OverlayWindow
 		void receiveAddLayerName(bool isCanceled, const QString &name);
 		void runRemoveLayer();
 
+		QTemporaryFile *rangesFile;
+		void runRenderLegacy();
+
 		QString oldNameToReplace;
 		void runRenameLayer();
 		void receiveRenameLayer(bool isCanceled, const QString &newName);
@@ -70,9 +78,13 @@ class EditorWindow : public OverlayWindow
 		QMenuBar *menuBar;
 
 		void setupMenu();
+		void setupSettings();
 
 		Placeholder *videoTabPlaceholder;
 		VideoTab *videoTab;
+		SettingsTab *settingsTab;
+
+		void closeEvent(QCloseEvent *event) override;
 };
 
 

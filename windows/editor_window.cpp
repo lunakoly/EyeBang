@@ -6,6 +6,11 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QStandardPaths>
+#include <QDir>
+#include <QTemporaryFile>
+#include <QProcess>
+#include <QTextCodec>
 
 
 EditorWindow::EditorWindow() : OverlayWindow("Ranger")
@@ -27,8 +32,12 @@ EditorWindow::EditorWindow() : OverlayWindow("Ranger")
 		runAddLayer();
 	});
 
+	settingsTab = new SettingsTab(this);
+	tabs->addTab(settingsTab, "Settings");
+
 	setupActions();
 	setupMenu();
+	setupSettings();
 }
 
 void EditorWindow::setupActions()
@@ -123,6 +132,10 @@ void EditorWindow::setupActions()
 
 	connect(actionStepScrollLeft,  &QAction::triggered, videoTab->getTimeline(), &Timeline::stepScrollLeft);
 	connect(actionStepScrollRight, &QAction::triggered, videoTab->getTimeline(), &Timeline::stepScrollRight);
+
+	actionRenderLegacy = new QAction(tr("Render (Legacy CLI)"), this);
+
+	connect(actionRenderLegacy, &QAction::triggered, this, &EditorWindow::runRenderLegacy);
 }
 
 void EditorWindow::setupMenu()
@@ -159,8 +172,27 @@ void EditorWindow::setupMenu()
 		editMenu->addAction(actionNewLeftBound);
 		editMenu->addAction(actionNewRightBound);
 
+	QMenu *renderMenu = menuBar->addMenu(tr("Render"));
+		renderMenu->addAction(actionRenderLegacy);
+
 	QMenu *helpMenu = menuBar->addMenu(tr("Help"));
-		helpMenu->addAction(actionAbout);
+	helpMenu->addAction(actionAbout);
+}
+
+void EditorWindow::setupSettings()
+{
+	QString filename = QDir::home().absoluteFilePath(".ranger/settings.json");
+	QFile file(filename);
+
+	if (file.exists() && !file.open(QIODevice::ReadOnly))
+	{
+		settingsTab->setSettings(&settings);
+		QMessageBox::warning(this, tr("Warning"), tr("Can't open the settings file: ") + file.errorString());
+		return;
+	}
+
+	settings = Settings::loadFromFile(file);
+	settingsTab->setSettings(&settings);
 }
 
 void EditorWindow::runAbout()
@@ -237,8 +269,6 @@ void EditorWindow::runExportRangesFile()
 	{
 		project->exportRangesFile(file);
 	}
-
-	file.close();
 }
 
 void EditorWindow::runAddLayer()
@@ -273,6 +303,91 @@ void EditorWindow::runRemoveLayer()
 	if (project != nullptr)
 	{
 		project->removeLayer(videoTab->getTimeline()->getCurrentLayer()->getName());
+	}
+}
+
+void EditorWindow::runRenderLegacy()
+{
+	if (project != nullptr)
+	{
+		if (!QFile(settings.legacyCLIScriptPath).exists())
+		{
+			QMessageBox::critical(this, tr("Error"), tr("The path to the legacy Ranger CLI utility hasn't been specified!"));
+			return;
+		}
+
+		QString saveDirectory = QFileDialog::getExistingDirectory(
+			this,
+			tr("Resulting Files Location"),
+			""
+		);
+
+		if (saveDirectory.isNull())
+		{
+			return;
+		}
+
+		rangesFile = new QTemporaryFile(this);
+
+		if (!rangesFile->open())
+		{
+			QMessageBox::warning(this, tr("Warning"), tr("Can't open file: ") + rangesFile->errorString());
+			return;
+		}
+
+		project->exportRangesFile(*rangesFile);
+
+		QString outputFilesPattern = settings.legacyCLIOutputFilesPattern;
+
+		if (outputFilesPattern.isEmpty())
+		{
+			outputFilesPattern = "{}.mp4";
+		}
+
+		QStringList arguments;
+		arguments << settings.legacyCLIScriptPath;
+		arguments << "-i" << project->getVideoFile();
+		arguments << "-r" << rangesFile->fileName();
+		arguments << "-o" << QDir(saveDirectory + "/" + outputFilesPattern).absolutePath();
+
+		QProcess *process = new QProcess(this);
+
+		connect(
+			process,
+			QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+			[this](int, QProcess::ExitStatus){
+				QMessageBox::information(this, tr("Done"), tr("Files have been rendered."));
+				this->rangesFile->deleteLater();
+			}
+		);
+
+//			connect(
+//				process,
+//				&QProcess::readyReadStandardOutput,
+//				[process](){
+//					qDebug() << "Reading Output";
+//					qDebug() << process->readAllStandardOutput();
+//				}
+//			);
+
+//			connect(
+//				process,
+//				&QProcess::readyReadStandardError,
+//				[process](){
+//					qDebug() << "Reading Error";
+//					qDebug() << process->readAllStandardError();
+//				}
+//			);
+
+		QString command = settings.legacyCLIPythonCommand;
+
+		if (command.isEmpty())
+		{
+			command = "python";
+		}
+
+		process->setProcessChannelMode(QProcess::ForwardedChannels);
+		process->start(command, arguments);
 	}
 }
 
@@ -314,4 +429,25 @@ void EditorWindow::runNewRightBound()
 	{
 		timeline->getCurrentLayer()->setNewRightBound(timeline->value());
 	}
+}
+
+void EditorWindow::closeEvent(QCloseEvent *event)
+{
+	Q_UNUSED(event);
+
+	if (!QDir(QDir::home().absoluteFilePath(".ranger")).exists())
+	{
+		QDir::home().mkdir(".ranger");
+	}
+
+	QString filename = QDir::home().absoluteFilePath(".ranger/settings.json");
+	QFile file(filename);
+
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Can't save settings file: ") + file.errorString());
+		return;
+	}
+
+	settings.saveToFile(file);
 }
