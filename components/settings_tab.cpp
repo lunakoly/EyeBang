@@ -25,6 +25,7 @@ SettingsTab::SettingsTab(QWidget *parent) : QScrollArea(parent)
 		legacyCLILayout->addLayout(line1);
 
 		QLabel *pythonCommandLabel = new QLabel(tr("Python interpreter command:"), legacyCLIGroup);
+		pythonCommandLabel->setToolTip(tr("The command to use for running the cut.py script (the legacy Ranger CLI utility)"));
 		line1->addWidget(pythonCommandLabel);
 
 		QHBoxLayout *line1End = new QHBoxLayout();
@@ -32,6 +33,7 @@ SettingsTab::SettingsTab(QWidget *parent) : QScrollArea(parent)
 
 		legacyCLIPythonCommandValue = new QLineEdit(legacyCLIGroup);
 		legacyCLIPythonCommandValue->setPlaceholderText("python");
+		legacyCLIPythonCommandValue->setToolTip(tr("Type in the name of the command or use the Find button to choose a file"));
 		line1End->addWidget(legacyCLIPythonCommandValue);
 
 		connect(legacyCLIPythonCommandValue, &QLineEdit::textEdited, [&](const QString &text){
@@ -42,6 +44,7 @@ SettingsTab::SettingsTab(QWidget *parent) : QScrollArea(parent)
 		});
 
 		QPushButton *pythonCommandFind = new QPushButton("Find", legacyCLIGroup);
+		pythonCommandFind->setToolTip(tr("Click to open the file inspector for choosing the file"));
 		line1End->addWidget(pythonCommandFind);
 
 		connect(pythonCommandFind, &QPushButton::clicked, this, &SettingsTab::legacyCLIPythonCommandFindClicked);
@@ -50,15 +53,18 @@ SettingsTab::SettingsTab(QWidget *parent) : QScrollArea(parent)
 		legacyCLILayout->addLayout(line2);
 
 		QLabel *scriptPathLabel = new QLabel(tr("Path to legacy Ranger CLI utility:"), legacyCLIGroup);
+		scriptPathLabel->setToolTip(tr("Path to the cut.py script file (the legacy Ranger CLI utility)"));
 		line2->addWidget(scriptPathLabel);
 
 		QHBoxLayout *line2End = new QHBoxLayout();
 		line2->addLayout(line2End);
 
 		legacyCLIScriptPathButton = new QPushButton("Set Path", legacyCLIGroup);
+		legacyCLIScriptPathButton->setToolTip(tr("Click to choose a file"));
 		line2End->addWidget(legacyCLIScriptPathButton);
 
 		QPushButton *scriptPathReset = new QPushButton("X", legacyCLIGroup);
+		scriptPathReset->setToolTip(tr("Click to reset the cut.py path"));
 		line2End->addWidget(scriptPathReset);
 
 		connect(legacyCLIScriptPathButton, &QPushButton::clicked, this, &SettingsTab::legacyCLIScriptPathButtonClicked);
@@ -75,9 +81,11 @@ SettingsTab::SettingsTab(QWidget *parent) : QScrollArea(parent)
 		legacyCLILayout->addLayout(line3);
 
 		QLabel *outputFilesPatternLabel = new QLabel(tr("Output files pattern:"), legacyCLIGroup);
+		outputFilesPatternLabel->setToolTip(tr("Format used for the output files. Use {} to substitute the layer name"));
 		line3->addWidget(outputFilesPatternLabel);
 
-		QLineEdit *outputFilesPatternValue = new QLineEdit(legacyCLIGroup);
+		outputFilesPatternValue = new QLineEdit(legacyCLIGroup);
+		outputFilesPatternValue->setToolTip(tr("Type in the format for the output files. Use {} to substitute the layer name"));
 		outputFilesPatternValue->setPlaceholderText("{}.mp4");
 		line3->addWidget(outputFilesPatternValue);
 
@@ -85,6 +93,24 @@ SettingsTab::SettingsTab(QWidget *parent) : QScrollArea(parent)
 			if (settings != nullptr)
 			{
 				settings->legacyCLIOutputFilesPattern = text;
+			}
+		});
+
+		QHBoxLayout *line4 = new QHBoxLayout();
+		legacyCLILayout->addLayout(line4);
+
+		QLabel *rangesFileNameLabel = new QLabel(tr("Output files pattern:"), legacyCLIGroup);
+		rangesFileNameLabel->setToolTip(tr("If not empty, the ranges file with that name will be saved to the output directory"));
+		line4->addWidget(rangesFileNameLabel);
+
+		rangesFileNameValue = new QLineEdit(legacyCLIGroup);
+		rangesFileNameValue->setToolTip(tr("If not empty, the ranges file with that name will be saved to the output directory"));
+		line4->addWidget(rangesFileNameValue);
+
+		connect(rangesFileNameValue, &QLineEdit::textEdited, [&](const QString &text){
+			if (settings != nullptr)
+			{
+				settings->legacyCLIRangesFileName = text;
 			}
 		});
 	}
@@ -153,27 +179,8 @@ void SettingsTab::setSettings(Settings *settings)
 		{
 			legacyCLIScriptPathButton->setText(settings->legacyCLIScriptPath);
 		}
+
+		outputFilesPatternValue->setText(settings->legacyCLIOutputFilesPattern);
+		rangesFileNameValue->setText(settings->legacyCLIRangesFileName);
 	}
 }
-
-//void SettingsTab::legacyCLIScriptPathChanged()
-//{
-//	if (settings != nullptr)
-//	{
-//		if (settings->getLegacyCLIScriptPath().isEmpty()){
-//			legacyCLIScriptPathButton->setText("Set Path");
-//		}
-//		else
-//		{
-//			legacyCLIScriptPathButton->setText(settings->getLegacyCLIScriptPath());
-//		}
-//	}
-//}
-
-//void SettingsTab::legacyCLIPythonCommandChanged()
-//{
-//	if (settings != nullptr)
-//	{
-//		legacyCLIPythonCommandValue->setText(settings->getLegacyCLIPythonCommand());
-//	}
-//}

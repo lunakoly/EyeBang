@@ -37,6 +37,8 @@ class SettingsTab : public QScrollArea
 
 		QLineEdit *legacyCLIPythonCommandValue;
 		QPushButton *legacyCLIScriptPathButton;
+		QLineEdit *outputFilesPatternValue;
+		QLineEdit *rangesFileNameValue;
 
 		void legacyCLIPythonCommandFindClicked();
 		void legacyCLIPythonCommandChanged();

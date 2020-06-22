@@ -4,6 +4,8 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonValue>
+#include <QDir>
+#include <QMessageBox>
 
 
 void Settings::saveToFile(QFile &file)
@@ -15,12 +17,27 @@ void Settings::saveToFile(QFile &file)
 	legacyCLI.insert("python_command", legacyCLIPythonCommand);
 	legacyCLI.insert("script_path", legacyCLIScriptPath);
 	legacyCLI.insert("output_files_pattern", legacyCLIOutputFilesPattern);
+	legacyCLI.insert("ranges_file_name", legacyCLIRangesFileName);
 	allSettings.insert("legacy_cli", legacyCLI);
 
 	QJsonDocument document(allSettings);
 
 	QTextStream output(&file);
 	output << document.toJson(QJsonDocument::Indented);
+}
+
+void Settings::save()
+{
+	QDir::home().mkdir(".ranger");
+
+	QFile file = QDir::home().absoluteFilePath(".ranger/settings.json");
+
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		QMessageBox::warning(nullptr, QObject::tr("Warning"), QObject::tr("Couldn't create the settings file") + " (" + file.errorString() + ")");
+	}
+
+	this->saveToFile(file);
 }
 
 Settings Settings::loadFromFile(QFile &file)
@@ -66,7 +83,26 @@ Settings Settings::parseVersion_1_0_0(QJsonObject allSettings)
 		{
 			settings.legacyCLIOutputFilesPattern = legacyCLI.take("output_files_pattern").toString();
 		}
+
+		if (legacyCLI.value("ranges_file_name").isString())
+		{
+			settings.legacyCLIRangesFileName = legacyCLI.take("ranges_file_name").toString();
+		}
 	}
 
 	return settings;
+}
+
+Settings Settings::load()
+{
+	QString filename = QDir::home().absoluteFilePath(".ranger/settings.json");
+	QFile file(filename);
+
+	if (file.exists() && !file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		QMessageBox::warning(nullptr, QObject::tr("Warning"), QObject::tr("Can't open the settings file") + " (" + file.errorString() + ")");
+		return {};
+	}
+
+	return Settings::loadFromFile(file);
 }

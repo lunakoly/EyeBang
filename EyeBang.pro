@@ -30,7 +30,8 @@ SOURCES += \
     main.cpp \
     windows/custom_window.cpp \
     windows/editor_window.cpp \
-    windows/overlay_window.cpp
+    windows/overlay_window.cpp \
+    windows/render_legacy_window.cpp
 
 HEADERS += \
     aliases.h \
@@ -49,7 +50,8 @@ HEADERS += \
     help.h \
     windows/custom_window.h \
     windows/editor_window.h \
-    windows/overlay_window.h
+    windows/overlay_window.h \
+    windows/render_legacy_window.h
 
 FORMS +=
 

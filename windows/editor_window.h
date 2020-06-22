@@ -78,7 +78,6 @@ class EditorWindow : public OverlayWindow
 		QMenuBar *menuBar;
 
 		void setupMenu();
-		void setupSettings();
 
 		Placeholder *videoTabPlaceholder;
 		VideoTab *videoTab;

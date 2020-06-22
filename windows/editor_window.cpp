@@ -1,6 +1,7 @@
 #include "editor_window.h"
 
 #include "editing/project.h"
+#include "windows/render_legacy_window.h"
 
 #include <QTabWidget>
 #include <QAction>
@@ -32,12 +33,14 @@ EditorWindow::EditorWindow() : OverlayWindow("Ranger")
 		runAddLayer();
 	});
 
+	settings = Settings::load();
+
 	settingsTab = new SettingsTab(this);
+	settingsTab->setSettings(&settings);
 	tabs->addTab(settingsTab, "Settings");
 
 	setupActions();
 	setupMenu();
-	setupSettings();
 }
 
 void EditorWindow::setupActions()
@@ -179,22 +182,6 @@ void EditorWindow::setupMenu()
 	helpMenu->addAction(actionAbout);
 }
 
-void EditorWindow::setupSettings()
-{
-	QString filename = QDir::home().absoluteFilePath(".ranger/settings.json");
-	QFile file(filename);
-
-	if (file.exists() && !file.open(QIODevice::ReadOnly))
-	{
-		settingsTab->setSettings(&settings);
-		QMessageBox::warning(this, tr("Warning"), tr("Can't open the settings file: ") + file.errorString());
-		return;
-	}
-
-	settings = Settings::loadFromFile(file);
-	settingsTab->setSettings(&settings);
-}
-
 void EditorWindow::runAbout()
 {
 	QMessageBox::about(this, tr("About"), tr("EyeBang v0.0.2"));
@@ -213,7 +200,7 @@ void EditorWindow::runNewVideoFile()
 
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("Can't open file: ") + file.errorString());
+		QMessageBox::warning(this, tr("Warning"), tr("Can't open file") + " (" + file.errorString() + ")");
 		return;
 	}
 
@@ -261,7 +248,7 @@ void EditorWindow::runExportRangesFile()
 
 	if (!file.open(QIODevice::WriteOnly))
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("Can't open file: ") + file.errorString());
+		QMessageBox::warning(this, tr("Warning"), tr("Can't write this file") + " (" + file.errorString() + ")");
 		return;
 	}
 
@@ -310,84 +297,12 @@ void EditorWindow::runRenderLegacy()
 {
 	if (project != nullptr)
 	{
-		if (!QFile(settings.legacyCLIScriptPath).exists())
-		{
-			QMessageBox::critical(this, tr("Error"), tr("The path to the legacy Ranger CLI utility hasn't been specified!"));
-			return;
-		}
-
-		QString saveDirectory = QFileDialog::getExistingDirectory(
-			this,
-			tr("Resulting Files Location"),
-			""
-		);
-
-		if (saveDirectory.isNull())
-		{
-			return;
-		}
-
-		rangesFile = new QTemporaryFile(this);
-
-		if (!rangesFile->open())
-		{
-			QMessageBox::warning(this, tr("Warning"), tr("Can't open file: ") + rangesFile->errorString());
-			return;
-		}
-
-		project->exportRangesFile(*rangesFile);
-
-		QString outputFilesPattern = settings.legacyCLIOutputFilesPattern;
-
-		if (outputFilesPattern.isEmpty())
-		{
-			outputFilesPattern = "{}.mp4";
-		}
-
-		QStringList arguments;
-		arguments << settings.legacyCLIScriptPath;
-		arguments << "-i" << project->getVideoFile();
-		arguments << "-r" << rangesFile->fileName();
-		arguments << "-o" << QDir(saveDirectory + "/" + outputFilesPattern).absolutePath();
-
-		QProcess *process = new QProcess(this);
-
-		connect(
-			process,
-			QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-			[this](int, QProcess::ExitStatus){
-				QMessageBox::information(this, tr("Done"), tr("Files have been rendered."));
-				this->rangesFile->deleteLater();
-			}
-		);
-
-//			connect(
-//				process,
-//				&QProcess::readyReadStandardOutput,
-//				[process](){
-//					qDebug() << "Reading Output";
-//					qDebug() << process->readAllStandardOutput();
-//				}
-//			);
-
-//			connect(
-//				process,
-//				&QProcess::readyReadStandardError,
-//				[process](){
-//					qDebug() << "Reading Error";
-//					qDebug() << process->readAllStandardError();
-//				}
-//			);
-
-		QString command = settings.legacyCLIPythonCommand;
-
-		if (command.isEmpty())
-		{
-			command = "python";
-		}
-
-		process->setProcessChannelMode(QProcess::ForwardedChannels);
-		process->start(command, arguments);
+		auto modal = new RenderLegacyWindow(settings, *project);
+		modal->show();
+	}
+	else
+	{
+		QMessageBox::warning(this, tr("Hmm, wait..."), tr("You haven't opened a project so there's nothing you can render now!"));
 	}
 }
 
@@ -434,20 +349,5 @@ void EditorWindow::runNewRightBound()
 void EditorWindow::closeEvent(QCloseEvent *event)
 {
 	Q_UNUSED(event);
-
-	if (!QDir(QDir::home().absoluteFilePath(".ranger")).exists())
-	{
-		QDir::home().mkdir(".ranger");
-	}
-
-	QString filename = QDir::home().absoluteFilePath(".ranger/settings.json");
-	QFile file(filename);
-
-	if (!file.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(this, tr("Warning"), tr("Can't save settings file: ") + file.errorString());
-		return;
-	}
-
-	settings.saveToFile(file);
+	settings.save();
 }

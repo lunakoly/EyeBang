@@ -27,12 +27,23 @@ class Settings
 		 * video files.
 		 */
 		QString legacyCLIOutputFilesPattern;
+		/**
+		 * If not empty, saves the ranges file to the output
+		 * directory. Otherwise, the temporary file
+		 * will be used instead.
+		 */
+		QString legacyCLIRangesFileName;
 
 		/**
 		 * Writes the settings to the
 		 * specified file.
 		 */
 		void saveToFile(QFile &file);
+		/**
+		 * Saves the settings to the
+		 * default settings file.
+		 */
+		void save();
 		/**
 		 * Returns an instance of Settings
 		 * with the contents loaded
@@ -41,6 +52,11 @@ class Settings
 		 * of an error.
 		 */
 		static Settings loadFromFile(QFile &file);
+		/**
+		 * Loads the settings from the
+		 * default settings file.
+		 */
+		static Settings load();
 
 	private:
 		static Settings parseVersion_1_0_0(QJsonObject allSettings);
